@@ -284,7 +284,7 @@ int32_t main(void)
     */
 
     printf("+----------------------------------------------------------+\n");
-    printf("|    NUC029xEE I2C Driver Sample Code with EEPROM 24LC64     |\n");
+    printf("|    NUC029xEE I2C Driver Sample Code with EEPROM 24LC64   |\n");
     printf("+----------------------------------------------------------+\n");
 
     printf("Configure I2C0 as a master.\n");

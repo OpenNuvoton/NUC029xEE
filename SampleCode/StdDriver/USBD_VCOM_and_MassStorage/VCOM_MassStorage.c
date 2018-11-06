@@ -1335,6 +1335,7 @@ void MSC_AckCmd(void)
                     MSC_ReadTrig();
                     return;
                 }
+                break;
             }
             case UFI_REQUEST_SENSE:
             case UFI_INQUIRY:

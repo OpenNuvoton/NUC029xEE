@@ -187,7 +187,7 @@ int main()
 
     printf("\n\n");
     printf("+------------------------------------+\n");
-    printf("|      NUC029xEE FMC Sample Code       |\n");
+    printf("|      NUC029xEE FMC Sample Code     |\n");
     printf("+------------------------------------+\n");
 
     //SYS_UnlockReg();

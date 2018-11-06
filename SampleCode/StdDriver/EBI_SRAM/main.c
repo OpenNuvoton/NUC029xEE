@@ -150,9 +150,9 @@ int main(void)
     printf("|    EBI SRAM Sample Code    |\n");
     printf("+----------------------------+\n\n");
 
-    printf("******************************************************************************\n");
+    printf("********************************************************************************\n");
     printf("* Please connect BS616LV4017 to NUC029xEE Series EBI bus before EBI testing !! *\n");
-    printf("******************************************************************************\n\n");
+    printf("********************************************************************************\n\n");
 
     /* Enable EBI function and bus width to 16-bit */
     EBI_Open(0, EBI_BUSWIDTH_16BIT, EBI_TIMING_VERYSLOW, 0, 0);

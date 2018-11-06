@@ -207,9 +207,9 @@ int main(void)
     printf("|    EBI NOR Flash Sample Code    |\n");
     printf("+---------------------------------+\n\n");
 
-    printf("***************************************************************************\n");
+    printf("*****************************************************************************\n");
     printf("* Please connect W39L040P to NUC029xEE Series EBI bus before EBI testing !! *\n");
-    printf("***************************************************************************\n\n");
+    printf("*****************************************************************************\n\n");
 
     /* Enable EBI function and bus width to 8-bit, MCLK is HCLK/4 */
     EBI->EBICON = (EBI_MCLKDIV_4 << EBI_EBICON_MCLKDIV_Pos) | EBI_EBICON_ExtEN_Msk |

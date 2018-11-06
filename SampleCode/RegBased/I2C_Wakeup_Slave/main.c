@@ -284,7 +284,7 @@ int32_t main(void)
     */
     printf("\n");
     printf("+---------------------------------------------------------------------------+\n");
-    printf("| NUC029xEE I2C Driver Sample Code (Slave) for wake-up & access Slave test    |\n");
+    printf("| NUC029xEE I2C Driver Sample Code (Slave) for wake-up & access Slave test  |\n");
     printf("|                                                                           |\n");
     printf("| I2C Master (I2C0) <---> I2C Slave(I2C0)                                   |\n");
     printf("+---------------------------------------------------------------------------+\n");

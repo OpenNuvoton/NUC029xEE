@@ -45,7 +45,7 @@ int main(void)
 
     printf("\n\n");
     printf("+--------------------------------------------------------------------+\n");
-    printf("|                   NUC029xEE SPI Driver Sample Code                   |\n");
+    printf("|                  NUC029xEE SPI Driver Sample Code                  |\n");
     printf("+--------------------------------------------------------------------+\n");
     printf("\n");
     printf("\nThis sample code demonstrates SPI0 self loop back data transfer.\n");

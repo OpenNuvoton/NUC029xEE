@@ -178,7 +178,7 @@ int32_t main(void)
     UART0_Init();
 
     printf("+---------------------------------------------------------------+\n");
-    printf("|                       NUC029xEE IAP Sample Code                 |\n");
+    printf("|                       NUC029xEE IAP Sample Code               |\n");
     printf("+---------------------------------------------------------------+\n");
 
     printf("\nCPU @ %dHz\n\n", SystemCoreClock);

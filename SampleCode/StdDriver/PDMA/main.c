@@ -171,7 +171,7 @@ int32_t main(void)
     printf("\n\nCPU @ %dHz <%d>\n", SystemCoreClock, TEST_CH);
 
     printf("+--------------------------------------+ \n");
-    printf("|  NUC029xEE PDMA Driver Sample Code  | \n");
+    printf("|  NUC029xEE PDMA Driver Sample Code   | \n");
     printf("+--------------------------------------+ \n");
 
     /* Open Channel TEST_CH */
