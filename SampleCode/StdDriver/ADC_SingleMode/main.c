@@ -125,11 +125,11 @@ void AdcSingleModeTest()
         u8Option = getchar();
         if(u8Option == '1') {
 
-            /* Set the ADC operation mode as single, input mode as single-end and enable the analog input channel 2 */
-            ADC_Open(ADC, ADC_ADCR_DIFFEN_SINGLE_END, ADC_ADCR_ADMD_SINGLE, 0x1 << 2);
-
             /* Power on ADC module */
             ADC_POWER_ON(ADC);
+
+            /* Set the ADC operation mode as single, input mode as single-end and enable the analog input channel 2 */
+            ADC_Open(ADC, ADC_ADCR_DIFFEN_SINGLE_END, ADC_ADCR_ADMD_SINGLE, 0x1 << 2);
 
             /* Clear the A/D interrupt flag for safe */
             ADC_CLR_INT_FLAG(ADC, ADC_ADF_INT);
@@ -154,12 +154,12 @@ void AdcSingleModeTest()
             printf("Conversion result of channel 2: 0x%X (%d)\n\n", i32ConversionData, i32ConversionData);
         } else if(u8Option == '2') {
 
+            /* Power on ADC module */
+            ADC_POWER_ON(ADC);
+
             /* Set the ADC operation mode as single, input mode as differential and
                enable analog input channel 2 for differential input channel pair 1 */
             ADC_Open(ADC, ADC_ADCR_DIFFEN_DIFFERENTIAL, ADC_ADCR_ADMD_SINGLE, 0x1 << 2);
-
-            /* Power on ADC module */
-            ADC_POWER_ON(ADC);
 
             /* Clear the A/D interrupt flag for safe */
             ADC_CLR_INT_FLAG(ADC, ADC_ADF_INT);
