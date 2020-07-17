@@ -1,16 +1,16 @@
 /******************************************************************************
  * @file     massstorage.h
- * @brief    USB mass storage header file
+ * @brief    NUC029xEE series USB mass storage header file
  *
  * @note
- * Copyright (C) 2018 Nuvoton Technology Corp. All rights reserved.
+ * Copyright (C) 2019 Nuvoton Technology Corp. All rights reserved.
  ******************************************************************************/
 #ifndef __USBD_MASS_H__
 #define __USBD_MASS_H__
 
 /* Define the vendor id and product id */
 #define USBD_VID        0x0416
-#define USBD_PID        0xB008
+#define USBD_PID        0xB005
 
 /* Define EP maximum packet size */
 #define EP0_MAX_PKT_SIZE    64
@@ -60,17 +60,12 @@
 #define UFI_READ_CAPACITY                       0x25
 #define UFI_READ_10                             0x28
 #define UFI_READ_12                             0xA8
-#define UFI_READ_16                             0x9E
 #define UFI_WRITE_10                            0x2A
 #define UFI_WRITE_12                            0xAA
 #define UFI_VERIFY_10                           0x2F
 #define UFI_MODE_SELECT_10                      0x55
 #define UFI_MODE_SENSE_10                       0x5A
-#define UFI_READ_TOC                            0x43
-#define UFI_GET_CONFIGURATION                   0x46
-#define UFI_GET_EVENT_STATUS_NOTIFICATION       0x4A
-#define UFI_SET_CDROM_SPEED                     0xBB
-#define UFI_READ_CD                             0xBE
+#define UFI_READ_CAPACITY_16                    0x9E
 
 /*-----------------------------------------*/
 #define BULK_CBW  0x00
@@ -83,11 +78,6 @@ static __INLINE uint32_t get_be32(uint8_t *buf)
 {
     return ((uint32_t) buf[0] << 24) | ((uint32_t) buf[1] << 16) |
            ((uint32_t) buf[2] << 8) | ((uint32_t) buf[3]);
-}
-
-static __INLINE uint16_t get_be16(uint8_t * buf)
-{
-	return (((uint16_t) buf[0] << 8) | ((uint16_t) buf[1]));
 }
 
 
@@ -123,21 +113,12 @@ struct CSW
 };
 
 /*-------------------------------------------------------------*/
-/* MSC Disk Image Definitions */
-#define MSC_ImageSize   0x0000B000
-
-extern const unsigned char eprom[MSC_ImageSize];   /* Disk Image */
-
-#define MSC_MemorySize  MSC_ImageSize
-
-#define DATA_FLASH_STORAGE_SIZE (MSC_ImageSize) /* Configure the DATA FLASH storage size */
 #define MASS_BUFFER_SIZE    256               /* Mass Storage command buffer size */
-#define STORAGE_BUFFER_SIZE 2048                /* Data transfer buffer size in 2048 bytes alignment */
-#define CDROM_BLOCK_SIZE    2048                /* logic sector size */
+#define STORAGE_BUFFER_SIZE 512               /* Data transfer buffer size in 512 bytes alignment */
+#define UDC_SECTOR_SIZE   512                 /* logic sector size */
 
 extern uint32_t MassBlock[];
 extern uint32_t Storage_Block[];
-extern uint8_t volatile g_u8Suspend;
 
 #define MassCMD_BUF        ((uint32_t)&MassBlock[0])
 #define STORAGE_DATA_BUF   ((uint32_t)&Storage_Block[0])
@@ -156,6 +137,7 @@ void MSC_Write(void);
 void MSC_ModeSense10(void);
 void MSC_ReadTrig(void);
 void MSC_ClassRequest(void);
+void MSC_SetConfig(void);
 
 void MSC_ReadMedia(uint32_t addr, uint32_t size, uint8_t *buffer);
 void MSC_WriteMedia(uint32_t addr, uint32_t size, uint8_t *buffer);
@@ -168,4 +150,4 @@ void EP3_Handler(void);
 
 #endif  /* __USBD_MASS_H_ */
 
-/*** (C) COPYRIGHT 2018 Nuvoton Technology Corp. ***/
+/*** (C) COPYRIGHT 2019 Nuvoton Technology Corp. ***/

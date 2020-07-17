@@ -1,22 +1,17 @@
 /******************************************************************************
  * @file     main.c
  * @brief
- *           Show how to implement a USB keyboard device. 
- *           This sample code supports to use GPIO to simulate key input.
+ *           Use SD card as storage to implement a USB Mass-Storage device.
  * @note
- * Copyright (C) 2018 Nuvoton Technology Corp. All rights reserved.
+ * Copyright (C) 2019 Nuvoton Technology Corp. All rights reserved.
  ******************************************************************************/
 #include <stdio.h>
 #include "NuMicro.h"
-#include "hid_kb.h"
+#include "massstorage.h"
+#include "SDCARD.h"
 
 #define CRYSTAL_LESS        1
 #define TRIM_INIT           (GCR_BASE+0x118)
-
-/*--------------------------------------------------------------------------*/
-uint8_t volatile g_u8EP2Ready = 0;
-int IsDebugFifoEmpty(void);
-
 
 /*--------------------------------------------------------------------------*/
 
@@ -31,8 +26,6 @@ void EnableCLKO(uint32_t u32ClkSrc, uint32_t u32ClkDiv)
     /* Select CLKO clock source */
     CLK->CLKSEL2 = (CLK->CLKSEL2 & (~CLK_CLKSEL2_FRQDIV_S_Msk)) | u32ClkSrc;
 }
-
-
 
 void SYS_Init(void)
 {
@@ -58,7 +51,10 @@ void SYS_Init(void)
 
     /* Set core clock */
     CLK_SetCoreClock(72000000);
-    
+
+    /* Set Flash Access Delay */
+    FMC->FATCON |= (FMC_FATCON_FOMSEL0_Msk | FMC_FATCON_FOMSEL1_Msk);
+
     /* Select module clock source */
     CLK_SetModuleClock(UART0_MODULE, CLK_CLKSEL1_UART_S_HIRC, CLK_CLKDIV_UART(1));
     CLK_SetModuleClock(USBD_MODULE, CLK_CLKSEL0_USB_S_PLL, CLK_CLKDIV_USB(3));
@@ -72,6 +68,9 @@ void SYS_Init(void)
     /* Set core clock */
     CLK_SetCoreClock(72000000);
 
+    /* Set Flash Access Delay */
+    FMC->FATCON |= (FMC_FATCON_FOMSEL0_Msk | FMC_FATCON_FOMSEL1_Msk);
+
     /* Select module clock source */
     CLK_SetModuleClock(UART0_MODULE, CLK_CLKSEL1_UART_S_HIRC, CLK_CLKDIV_UART(1));
     CLK_SetModuleClock(USBD_MODULE, CLK_CLKSEL0_USB_S_RC48M, CLK_CLKDIV_USB(1));
@@ -80,6 +79,9 @@ void SYS_Init(void)
     /* Enable module clock */
     CLK_EnableModuleClock(UART0_MODULE);
     CLK_EnableModuleClock(USBD_MODULE);
+    CLK_EnableModuleClock(SPI1_MODULE);
+
+    CLK_SetModuleClock(SPI1_MODULE, CLK_CLKSEL1_SPI1_S_HCLK, MODULE_NoMsk);
 
     /*---------------------------------------------------------------------------------------------------------*/
     /* Init I/O Multi-function                                                                                 */
@@ -91,84 +93,18 @@ void SYS_Init(void)
     SYS->GPB_MFP |= (SYS_GPB_MFP_PB0_UART0_RXD | SYS_GPB_MFP_PB1_UART0_TXD | SYS_GPB_MFP_PB8_CLKO);
     SYS->ALT_MFP |=  SYS_ALT_MFP_PB8_CLKO;
 
+    /* Set SPI1 multi-function pins */
+    SYS->GPC_MFP &= ~(SYS_GPC_MFP_PC9_Msk | SYS_GPC_MFP_PC10_Msk | SYS_GPC_MFP_PC11_Msk);
+    SYS->GPC_MFP |= (SYS_GPC_MFP_PC9_SPI1_CLK | SYS_GPC_MFP_PC10_SPI1_MISO0 | SYS_GPC_MFP_PC11_SPI1_MOSI0);
+    SYS->ALT_MFP &= ~(SYS_ALT_MFP_PC9_Msk | SYS_ALT_MFP_PC10_Msk | SYS_ALT_MFP_PC11_Msk);
+    SYS->ALT_MFP |= (SYS_ALT_MFP_PC9_SPI1_CLK | SYS_ALT_MFP_PC10_SPI1_MISO0 | SYS_ALT_MFP_PC11_SPI1_MOSI0);
+    GPIO_SetMode(PC, BIT15, GPIO_PMD_OUTPUT);
+    GPIO_SetMode(PE, BIT5, GPIO_PMD_OUTPUT);
+
     /* Enable CLKO (PB.8) for monitor HCLK. CLKO = HCLK/8 Hz*/
     EnableCLKO((2 << CLK_CLKSEL2_FRQDIV_S_Pos), 2);
 }
 
-
-void UART0_Init(void)
-{
-    /*---------------------------------------------------------------------------------------------------------*/
-    /* Init UART                                                                                               */
-    /*---------------------------------------------------------------------------------------------------------*/
-    /* Reset IP */
-    SYS->IPRSTC2 |=  SYS_IPRSTC2_UART0_RST_Msk;
-    SYS->IPRSTC2 &= ~SYS_IPRSTC2_UART0_RST_Msk;
-
-    /* Configure UART0 and set UART0 Baudrate */
-    UART0->BAUD = UART_BAUD_MODE2 | UART_BAUD_MODE2_DIVIDER(__HIRC, 115200);
-    UART0->LCR = UART_WORD_LEN_8 | UART_PARITY_NONE | UART_STOP_BIT_1;
-}
-
-
-void HID_UpdateKbData(void)
-{
-    int32_t i;
-    uint8_t *buf;
-    uint32_t key = 0xF;
-    static uint32_t preKey;
-
-    if(g_u8EP2Ready)
-    {
-        buf = (uint8_t *)(USBD_BUF_BASE + USBD_GET_EP_BUF_ADDR(EP2));
-
-        /* If GPB15 = 0, just report it is key 'a' */
-        key = (PB->PIN & (1 << 15)) ? 0 : 1;
-
-        if(key == 0)
-        {
-            for(i = 0; i < 8; i++)
-            {
-                buf[i] = 0;
-            }
-
-            if(key != preKey)
-            {
-                /* Trigger to note key release */
-                USBD_SET_PAYLOAD_LEN(EP2, 8);
-            }
-        }
-        else
-        {
-            preKey = key;
-            buf[2] = 0x04; /* Key A */
-            USBD_SET_PAYLOAD_LEN(EP2, 8);
-        }
-    }
-}
-
-void PowerDown()
-{
-    /* Unlock protected registers */
-    SYS_UnlockReg();
-
-    printf("Enter power down ...\n");
-    while(!IsDebugFifoEmpty());
-
-    /* Wakeup Enable */
-    USBD_ENABLE_INT(USBD_INTEN_WAKEUP_EN_Msk);
-
-    CLK_PowerDown();
-
-    /* Clear PWR_DOWN_EN if it is not clear by itself */
-    if(CLK->PWRCON & CLK_PWRCON_PWR_DOWN_EN_Msk)
-        CLK->PWRCON ^= CLK_PWRCON_PWR_DOWN_EN_Msk;
-
-    printf("device wakeup!\n");
-
-    /* Lock protected registers */
-    SYS_LockReg();
-}
 
 /*---------------------------------------------------------------------------------------------------------*/
 /*  Main Function                                                                                          */
@@ -184,20 +120,22 @@ int32_t main(void)
 
     SYS_Init();
 
-    UART0_Init();
+    /* Configure UART0: 115200, 8-bit word, no parity bit, 1 stop bit. */
+    UART_Open(UART0, 115200);
 
-    printf("\n");
-    printf("+--------------------------------------------------------+\n");
-    printf("|          NuMicro USB HID Keyboard Sample Code          |\n");
-    printf("+--------------------------------------------------------+\n");
-    printf("If PB.15 = 0, just report it is key 'a'.\n");
+    printf("+-------------------------------------------------------+\n");
+    printf("|          NuMicro USB MassStorage Sample Code          |\n");
+    printf("+-------------------------------------------------------+\n");
 
-    USBD_Open(&gsInfo, HID_ClassRequest, NULL);
+    SDCARD_Open();
+
+    USBD_Open(&gsInfo, MSC_ClassRequest, NULL);
+
+    USBD_SetConfigCallback(MSC_SetConfig);
 
     /* Endpoint configuration */
-    HID_Init();
+    MSC_Init();
     USBD_Start();
-
     NVIC_EnableIRQ(USBD_IRQn);
 
 #if CRYSTAL_LESS
@@ -207,9 +145,6 @@ int32_t main(void)
 
     /* Clear SOF */
     USBD->INTSTS = USBD_INTSTS_SOF_STS_Msk;
-
-    /* start to IN data */
-    g_u8EP2Ready = 1;
 
     while(1)
     {
@@ -246,15 +181,8 @@ int32_t main(void)
         }
 #endif
 
-        /* Enter power down when USB suspend */
-        if(g_u8Suspend)
-            PowerDown();
-
-        HID_UpdateKbData();
+        MSC_ProcessCmd();
     }
 }
 
-
-
-/*** (C) COPYRIGHT 2018 Nuvoton Technology Corp. ***/
-
+/*** (C) COPYRIGHT 2019 Nuvoton Technology Corp. ***/

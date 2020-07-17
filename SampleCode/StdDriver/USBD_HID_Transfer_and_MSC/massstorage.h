@@ -31,12 +31,12 @@
 #define UFI_READ_CAPACITY                       0x25
 #define UFI_READ_10                             0x28
 #define UFI_READ_12                             0xA8
+#define UFI_READ_16                             0x9E
 #define UFI_WRITE_10                            0x2A
 #define UFI_WRITE_12                            0xAA
 #define UFI_VERIFY_10                           0x2F
 #define UFI_MODE_SELECT_10                      0x55
 #define UFI_MODE_SENSE_10                       0x5A
-#define UFI_READ_CAPACITY_16                    0x9E
 
 /*-----------------------------------------*/
 #define BULK_CBW  0x00
@@ -55,7 +55,7 @@ static __INLINE uint32_t get_be32(uint8_t *buf)
 /******************************************************************************/
 /*                USBD Mass Storage Structure                                 */
 /******************************************************************************/
-/** @addtogroup NUC230_240_USBD_Mass_Exported_Struct NUC029xEE USBD Mass Exported Struct
+/** @addtogroup NUC029xEE_USBD_Mass_Exported_Struct NUC029xEE USBD Mass Exported Struct
   NUC029xEE USBD Mass Specific Struct
   @{
 */

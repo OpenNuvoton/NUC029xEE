@@ -166,6 +166,9 @@ typedef struct
  * |[3]     |WAKEUP_STS|Wake-Up Interrupt Status
  * |        |          |0 = No Wake-up event occurred.
  * |        |          |1 = Wake-up event occurred, cleared by write 1 to USB_INTSTS[3].
+ * |[4]     |SOF_STS   |Start of Frame Interrupt Status
+ * |        |          |0 = SOF event does not occur.
+ * |        |          |1 = SOF event occurred, cleared by write 1 to USBD_INTSTS[4].
  * |[16]    |EPEVT0    |Endpoint 0's USB Event Status
  * |        |          |0 = No event occurred on endpoint 0.
  * |        |          |1 = USB event occurred on Endpoint 0, check USB_EPSTS[10:8] to know which kind of USB event was
@@ -339,6 +342,13 @@ typedef struct
  * |        |          |USB_SRAM address + {STBUFSEG[8:3], 3'b000}
  * |        |          |Where the USB_SRAM address = USBD_BA+0x100h.
  * |        |          |Note: It is used for SETUP token only.
+ * @var USBD_T::FN
+ * Offset: 0x8C  USB Frame Number Register
+ * ---------------------------------------------------------------------------------------------------
+ * |Bits    |Field     |Descriptions
+ * | :----: | :----:   | :---- |
+ * |[10:0]  |FN        |Frame Number
+ * |        |          |These bits contain the 11-bits frame number in the last received SOF packet.
  * @var USBD_T::DRVSE0
  * Offset: 0x90  USB Drive SE0 Control Register
  * ---------------------------------------------------------------------------------------------------
@@ -357,10 +367,11 @@ typedef struct
     __IO uint32_t ATTR;          /* Offset: 0x10  USB Bus Status and Attribution Register                            */
     __I  uint32_t FLDET;         /* Offset: 0x14  USB Floating Detection Register                                    */
     __IO uint32_t STBUFSEG;      /* Offset: 0x18  Setup Token Buffer Segmentation Register                           */
-    __I  uint32_t RESERVE1[29];  
+    __I  uint32_t RESERVE1[28];
+    __I  uint32_t FN;            /* Offset: 0x8C  USB Frame number Register                                          */
     __IO uint32_t DRVSE0;        /* Offset: 0x90  USB Drive SE0 Control Register                                     */
     __I  uint32_t RESERVE2[283];
-        USBD_EP_T EP[8];         /* Offset: 0x500 Endpoint 0~7 Control Registers                                     */
+    USBD_EP_T     EP[8];         /* Offset: 0x500 Endpoint 0~7 Control Registers                                     */
 
 } USBD_T;
 
@@ -418,6 +429,9 @@ typedef struct
 #define USBD_INTSTS_EPEVT0_Pos       16                                  /*!< USBD_T::INTSTS: EPEVT0 Position */
 #define USBD_INTSTS_EPEVT0_Msk       (0x1ul << USBD_INTSTS_EPEVT0_Pos)   /*!< USBD_T::INTSTS: EPEVT0 Mask     */
 
+#define USBD_INTSTS_SOF_STS_Pos      4                                   /*!< USBD_T::INTSTS: SOF_STS Position */
+#define USBD_INTSTS_SOF_STS_Msk      (1ul << USBD_INTSTS_SOF_STS_Pos)    /*!< USBD_T::INTSTS: SOF_STS Mask */
+
 #define USBD_INTSTS_WAKEUP_STS_Pos   3                                   /*!< USBD_T::INTSTS: WAKEUP_STS Position */
 #define USBD_INTSTS_WAKEUP_STS_Msk   (1ul << USBD_INTSTS_WAKEUP_STS_Pos) /*!< USBD_T::INTSTS: WAKEUP_STS Mask */
 
@@ -435,11 +449,17 @@ typedef struct
 #define USBD_FADDR_FADDR_Msk     (0x7Ful << USBD_FADDR_FADDR_Pos)        /*!< USBD_T::FADDR: FADDR Mask */
 
 /* USBD EPSTS Bit Field Definitions */
+#define USBD_EPSTS_EPSTS7_Pos    29                                      /*!< USBD_T::EPSTS: EPSTS7 Position */
+#define USBD_EPSTS_EPSTS7_Msk    (7ul << USBD_EPSTS_EPSTS7_Pos)          /*!< USBD_T::EPSTS: EPSTS7 Mask */
+
+#define USBD_EPSTS_EPSTS6_Pos    26                                      /*!< USBD_T::EPSTS: EPSTS6 Position */
+#define USBD_EPSTS_EPSTS6_Msk    (7ul << USBD_EPSTS_EPSTS6_Pos)          /*!< USBD_T::EPSTS: EPSTS6 Mask */
+
 #define USBD_EPSTS_EPSTS5_Pos    23                                      /*!< USBD_T::EPSTS: EPSTS5 Position */
 #define USBD_EPSTS_EPSTS5_Msk    (7ul << USBD_EPSTS_EPSTS5_Pos)          /*!< USBD_T::EPSTS: EPSTS5 Mask */
 
 #define USBD_EPSTS_EPSTS4_Pos    20                                      /*!< USBD_T::EPSTS: EPSTS4 Position */
-#define USBD_EPSTS_EPSTS4_Msk    (7ul << USBD_EPSTS_EPSTS4_Pos)          /*!< USBD_T::EPSTS: EPSTS5 Mask */
+#define USBD_EPSTS_EPSTS4_Msk    (7ul << USBD_EPSTS_EPSTS4_Pos)          /*!< USBD_T::EPSTS: EPSTS4 Mask */
 
 #define USBD_EPSTS_EPSTS3_Pos    17                                      /*!< USBD_T::EPSTS: EPSTS3 Position */
 #define USBD_EPSTS_EPSTS3_Msk    (7ul << USBD_EPSTS_EPSTS3_Pos)          /*!< USBD_T::EPSTS: EPSTS3 Mask */
@@ -495,6 +515,10 @@ typedef struct
 #define USBD_STBUFSEG_STBUFSEG_Pos   3                                        /*!< USBD_T::STBUFSEG: STBUFSEG Position */
 #define USBD_STBUFSEG_STBUFSEG_Msk   (0x3Ful << USBD_STBUFSEG_STBUFSEG_Pos)   /*!< USBD_T::STBUFSEG: STBUFSEG Mask */
 
+/* USBD FN Bit Field Definitions */
+#define USBD_FN_FN_Pos           0                                       /*!< USBD_T::FN: FN Position */
+#define USBD_FN_FN_Msk           (0x7FFul << USBD_FN_FN_Pos)             /*!< USBD_T::FN: FN Mask */
+
 /* USBD BUFSEG Bit Field Definitions */
 #define USBD_BUFSEG_BUFSEG_Pos   3                                       /*!< USBD_EP_T::BUFSEG: BUFSEG Position */
 #define USBD_BUFSEG_BUFSEG_Msk   (0x3Ful << USBD_BUFSEG_BUFSEG_Pos)      /*!< USBD_EP_T::BUFSEG: BUFSEG Mask */
@@ -529,9 +553,10 @@ typedef struct
 /* USBD DRVSE0 Bit Field Definitions */
 #define USBD_DRVSE0_DRVSE0_Pos   0                                       /*!< USBD_T::DRVSE0: DRVSE0 Position */
 #define USBD_DRVSE0_DRVSE0_Msk   (1ul << USBD_DRVSE0_DRVSE0_Pos)         /*!< USBD_T::DRVSE0: DRVSE0 Mask */
+
+
 /*@}*/ /* end of group USBD_CONST */
 /*@}*/ /* end of group USBD */
 /**@}*/ /* end of REGISTER group */
-
 
 #endif /* __USBD_REG_H__ */

@@ -35,6 +35,7 @@
 #define CONFIG_BASE      0x00300000
 #define DATA_FLASH_BASE  MASS_STORAGE_OFFSET
 
+int IsDebugFifoEmpty(void);
 
 /*--------------------------------------------------------------------------*/
 
@@ -85,6 +86,9 @@ void SYS_Init(void)
     /* Waiting for Internal RC clock ready */
     CLK_WaitClockReady(CLK_CLKSTATUS_OSC48M_STB_Msk);
 
+    /* Set core clock */
+    CLK_SetCoreClock(72000000);
+
     /* Select module clock source */
     CLK_SetModuleClock(UART0_MODULE, CLK_CLKSEL1_UART_S_HIRC, CLK_CLKDIV_UART(1));
     CLK_SetModuleClock(USBD_MODULE, CLK_CLKSEL0_USB_S_RC48M, CLK_CLKDIV_USB(1));
@@ -123,13 +127,37 @@ void UART0_Init(void)
     UART0->LCR = UART_WORD_LEN_8 | UART_PARITY_NONE | UART_STOP_BIT_1;
 }
 
+void PowerDown()
+{
+    /* Unlock protected registers */
+    SYS_UnlockReg();
+
+    printf("Enter power down ...\n");
+    while(!IsDebugFifoEmpty());
+
+    /* Wakeup Enable */
+    USBD_ENABLE_INT(USBD_INTEN_WAKEUP_EN_Msk);
+
+    CLK_PowerDown();
+
+    /* Clear PWR_DOWN_EN if it is not clear by itself */
+    if(CLK->PWRCON & CLK_PWRCON_PWR_DOWN_EN_Msk)
+        CLK->PWRCON ^= CLK_PWRCON_PWR_DOWN_EN_Msk;
+
+    printf("device wakeup!\n");
+
+    /* Lock protected registers */
+    SYS_LockReg();
+}
 
 /*---------------------------------------------------------------------------------------------------------*/
 /*  Main Function                                                                                          */
 /*---------------------------------------------------------------------------------------------------------*/
 int32_t main(void)
 {
+#if CRYSTAL_LESS
     uint32_t u32TrimInit;
+#endif
 
     /* Unlock protected registers */
     SYS_UnlockReg();
@@ -153,38 +181,56 @@ int32_t main(void)
     MSC_Init();
     USBD_Start();
 
-#if CRYSTAL_LESS
-    /* Backup init trim */
-    u32TrimInit = M32(TRIM_INIT);
+    NVIC_EnableIRQ(USBD_IRQn);
 
-    /* Enable USB crystal-less */
-    SYS->HIRCTCTL = 0x201 | (31 << SYS_HIRCTCTL_BOUNDARY_Pos);
+#if CRYSTAL_LESS
+    /* Backup default trim */
+    u32TrimInit = M32(TRIM_INIT);
 #endif
 
-    NVIC_EnableIRQ(USBD_IRQn);
+    /* Clear SOF */
+    USBD->INTSTS = USBD_INTSTS_SOF_STS_Msk;
 
     while(1)
     {
 #if CRYSTAL_LESS
-        /* Re-start crystal-less when any error found */
-        if (SYS->HIRCTSTS & (SYS_HIRCTSTS_CLKERIF_Msk | SYS_HIRCTSTS_TFAILIF_Msk))
+        /* Start USB trim if it is not enabled. */
+        if((SYS->HIRCTCTL & SYS_HIRCTCTL_FREQSEL_Msk) != 1)
         {
-            SYS->HIRCTSTS = SYS_HIRCTSTS_CLKERIF_Msk | SYS_HIRCTSTS_TFAILIF_Msk;
+            /* Start USB trim only when SOF */
+            if(USBD->INTSTS & USBD_INTSTS_SOF_STS_Msk)
+            {
+                /* Clear SOF */
+                USBD->INTSTS = USBD_INTSTS_SOF_STS_Msk;
+
+                /* Re-enable crystal-less */
+                SYS->HIRCTCTL = 0x201 | (31 << SYS_HIRCTCTL_BOUNDARY_Pos);
+            }
+        }
+
+        /* Disable USB Trim when error */
+        if(SYS->HIRCTSTS & (SYS_HIRCTSTS_CLKERIF_Msk | SYS_HIRCTSTS_TFAILIF_Msk))
+        {
+            /* Init TRIM */
+            M32(TRIM_INIT) = u32TrimInit;
 
             if((u32TrimInit < 0x1E6) || (u32TrimInit > 0x253))
                 /* Re-enable crystal-less */
                 SYS->HIRCTCTL = 0x201 | (1 << SYS_HIRCTCTL_BOUNDARY_Pos);
-            else
-                /* Re-enable crystal-less */
-                SYS->HIRCTCTL = 0x201 | (31 << SYS_HIRCTCTL_BOUNDARY_Pos);
-            //printf("USB trim fail. Just retry. SYS->HIRCTSTS = 0x%x, SYS->HIRCTCTL = 0x%x\n", SYS->HIRCTSTS, SYS->HIRCTCTL);
+
+            /* Clear error flags */
+            SYS->HIRCTSTS = SYS_HIRCTSTS_CLKERIF_Msk | SYS_HIRCTSTS_TFAILIF_Msk;
+
+            /* Clear SOF */
+            USBD->INTSTS = USBD_INTSTS_SOF_STS_Msk;
         }
 #endif
 
+        /* Enter power down when USB suspend */
+        if(g_u8Suspend)
+            PowerDown();
+
         MSC_ProcessCmd();
-#ifdef NONBLOCK_PRINTF
-        putchar(0); // Flush the data in software FIFO to UART
-#endif
     }
 }
 
