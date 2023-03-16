@@ -30,7 +30,7 @@ typedef struct
 
 /**
  * @var GPIO_T::PMD
- * Offset: 0x00  GPIO Port [A/B/C/D/E/F] Pin I/O Mode Control
+ * Offset: 0x00  GPIO Port [A/B/C/E/F] Pin I/O Mode Control
  * ---------------------------------------------------------------------------------------------------
  * |Bits    |Field     |Descriptions
  * | :----: | :----:   | :---- |
@@ -40,7 +40,7 @@ typedef struct
  * |        |          |01 = GPIO port [n] pin is in Push-pull Output mode.
  * |        |          |10 = GPIO port [n] pin is in Open-drain Output mode.
  * |        |          |11 = GPIO port [n] pin is in Quasi-bidirectional mode.
- * |        |          |Note1: Max. n = 3 for GPIOF; Max. n = 15 for GPIOA/GPIOB/GPIOC/GPIOD/GPIOE.
+ * |        |          |Note1: Max. n = 3 for GPIOF; Max. n = 15 for GPIOA/GPIOB/GPIOC/GPIOE.
  * |        |          |Note2:
  * |        |          |The initial value of this field is defined by CIOINI (Config0[10]).
  * |        |          |If CIOINI is set to 1, the default value is 0xFFFF_FFFF and all pins will be Quasi-bidirectional
@@ -48,7 +48,7 @@ typedef struct
  * |        |          |If CIOINI is cleared to 0, the default value is 0x0000_0000 and all pins will be input only mode
  * |        |          |after chip is powered on.
  * @var GPIO_T::OFFD
- * Offset: 0x04  GPIO Port [A/B/C/D/E/F] Pin Digital Input Path Disable Control
+ * Offset: 0x04  GPIO Port [A/B/C/E/F] Pin Digital Input Path Disable Control
  * ---------------------------------------------------------------------------------------------------
  * |Bits    |Field     |Descriptions
  * | :----: | :----:   | :---- |
@@ -57,47 +57,47 @@ typedef struct
  * |        |          |disabled.
  * |        |          |If input is analog signal, users can disable GPIO digital input path to avoid current leakage.
  * |        |          |0 = I/O digital input path Enabled.
- * |        |          |1 = I/O digital input path Disabled (digital input tied to low). 
- * |        |          |Note: Max. n = 3 for GPIOF; Max. n = 15 for GPIOA/GPIOB/GPIOC/GPIOD/GPIOE.
+ * |        |          |1 = I/O digital input path Disabled (digital input tied to low).
+ * |        |          |Note: Max. n = 3 for GPIOF; Max. n = 15 for GPIOA/GPIOB/GPIOC/GPIOE.
  * @var GPIO_T::DOUT
- * Offset: 0x08  GPIO Port [A/B/C/D/E/F] Data Output Value
+ * Offset: 0x08  GPIO Port [A/B/C/E/F] Data Output Value
  * ---------------------------------------------------------------------------------------------------
  * |Bits    |Field     |Descriptions
  * | :----: | :----:   | :---- |
  * |[n]     |DOUTn     |GPIOx Pin[n] Output Value
  * |        |          |Each of these bits controls the status of a GPIO pin when the GPIO pin is configured as
  * |        |          |Push-pull output, open-drain output or quasi-bidirectional mode.
- * |        |          |0 = GPIO port [A/B/C/D/E/F] Pin[n] will drive Low if the GPIO pin is configured as Push-pull
+ * |        |          |0 = GPIO port [A/B/C/E/F] Pin[n] will drive Low if the GPIO pin is configured as Push-pull
  * |        |          |output, Open-drain output or Quasi-bidirectional mode.
- * |        |          |1 = GPIO port [A/B/C/D/E/F] Pin[n] will drive High if the GPIO pin is configured as Push-pull
+ * |        |          |1 = GPIO port [A/B/C/E/F] Pin[n] will drive High if the GPIO pin is configured as Push-pull
  * |        |          |output or Quasi-bidirectional mode.
- * |        |          |Note: Max. n = 3 for GPIOF; Max. n = 15 for GPIOA/GPIOB/GPIOC/GPIOD/GPIOE. 
+ * |        |          |Note: Max. n = 3 for GPIOF; Max. n = 15 for GPIOA/GPIOB/GPIOC/GPIOE.
  * @var GPIO_T::DMASK
- * Offset: 0x0C  GPIO Port [A/B/C/D/E/F] Data Output Write Mask
+ * Offset: 0x0C  GPIO Port [A/B/C/E/F] Data Output Write Mask
  * ---------------------------------------------------------------------------------------------------
  * |Bits    |Field     |Descriptions
  * | :----: | :----:   | :---- |
- * |[n]     |DMASKn    |Port [A/B/C/D/E/F] Data Output Write Mask
+ * |[n]     |DMASKn    |Port [A/B/C/E/F] Data Output Write Mask
  * |        |          |These bits are used to protect the corresponding register of GPIOx_DOUT bit[n].
  * |        |          |When the DMASK bit[n] is set to 1, the corresponding GPIOx_DOUT[n] bit is protected.
  * |        |          |If the write signal is masked, write data to the protect bit is ignored.
  * |        |          |0 = Corresponding GPIOx_DOUT[n] bit can be updated.
  * |        |          |1 = Corresponding GPIOx_DOUT[n] bit protected.
  * |        |          |Note1: This function only protects the corresponding GPIOx_DOUT[n] bit, and will not protect the
- * |        |          |corresponding bit control register (PAn_PDIO, PBn_PDIO, PCn_PDIO, PDn_PDIO, PEn_PDIO and
- * |        |          |PFn_PDIO). 
- * |        |          |Note2: Max. n = 3 for GPIOF; Max. n = 15 for GPIOA/GPIOB/GPIOC/GPIOD/GPIOE.
+ * |        |          |corresponding bit control register (PAn_PDIO, PBn_PDIO, PCn_PDIO, PEn_PDIO and
+ * |        |          |PFn_PDIO).
+ * |        |          |Note2: Max. n = 3 for GPIOF; Max. n = 15 for GPIOA/GPIOB/GPIOC/GPIOE.
  * @var GPIO_T::PIN
- * Offset: 0x10  GPIO Port [A/B/C/D/E/F] Pin Value
+ * Offset: 0x10  GPIO Port [A/B/C/E/F] Pin Value
  * ---------------------------------------------------------------------------------------------------
  * |Bits    |Field     |Descriptions
  * | :----: | :----:   | :---- |
- * |[n]     |PINn      |Port [A/B/C/D/E/F] Pin Values
+ * |[n]     |PINn      |Port [A/B/C/E/F] Pin Values
  * |        |          |Each bit of the register reflects the actual status of the respective GPIO pin.
  * |        |          |If the bit is 1, it indicates the corresponding pin status is high, else the pin status is low.
- * |        |          |Note: Max. n = 3 for GPIOF; Max. n = 15 for GPIOA/GPIOB/GPIOC/GPIOD/GPIOE. 
+ * |        |          |Note: Max. n = 3 for GPIOF; Max. n = 15 for GPIOA/GPIOB/GPIOC/GPIOE.
  * @var GPIO_T::DBEN
- * Offset: 0x14  GPIO Port [A/B/C/D/E/F] De-bounce Enable
+ * Offset: 0x14  GPIO Port [A/B/C/E/F] De-bounce Enable
  * ---------------------------------------------------------------------------------------------------
  * |Bits    |Field     |Descriptions
  * | :----: | :----:   | :---- |
@@ -111,13 +111,13 @@ typedef struct
  * |        |          |1 = Bit[n] de-bounce function Enabled.
  * |        |          |The de-bounce function is valid only for edge triggered interrupt.
  * |        |          |If the interrupt mode is level triggered, the de-bounce enable bit is ignored.
- * |        |          |Note: Max. n = 3 for GPIOF; Max. n = 15 for GPIOA/GPIOB/GPIOC/GPIOD/GPIOE.
+ * |        |          |Note: Max. n = 3 for GPIOF; Max. n = 15 for GPIOA/GPIOB/GPIOC/GPIOE.
  * @var GPIO_T::IMD
- * Offset: 0x18  GPIO Port [A/B/C/D/E/F] Interrupt Mode Control
+ * Offset: 0x18  GPIO Port [A/B/C/E/F] Interrupt Mode Control
  * ---------------------------------------------------------------------------------------------------
  * |Bits    |Field     |Descriptions
  * | :----: | :----:   | :---- |
- * |[n]     |IMDn      |Port [A/B/C/D/E/F] Edge Or Level Detection Interrupt Control
+ * |[n]     |IMDn      |Port [A/B/C/E/F] Edge Or Level Detection Interrupt Control
  * |        |          |IMD[n] is used to control the interrupt is by level trigger or by edge trigger.
  * |        |          |If the interrupt is by edge trigger, the trigger source can be controlled by de-bounce.
  * |        |          |If the interrupt is by level trigger, the input source is sampled by one HCLK.
@@ -129,13 +129,13 @@ typedef struct
  * |        |          |If both levels to trigger interrupt are set, the setting is ignored and no interrupt will occur.
  * |        |          |The de-bounce function is valid only for edge triggered interrupt.
  * |        |          |If the interrupt mode is level triggered, the de-bounce enable bit is ignored.
- * |        |          |Note: Max. n = 3 for GPIOF; Max. n = 15 for GPIOA/GPIOB/GPIOC/GPIOD/GPIOE. 
+ * |        |          |Note: Max. n = 3 for GPIOF; Max. n = 15 for GPIOA/GPIOB/GPIOC/GPIOE.
  * @var GPIO_T::IEN
  * Offset: 0x1C  GPIO Port [A/B/C/D/E/F] Interrupt Enable
  * ---------------------------------------------------------------------------------------------------
  * |Bits    |Field     |Descriptions
  * | :----: | :----:   | :---- |
- * |[n]     |IF_ENn    |Port [A/B/C/D/E/F] Interrupt Enable By Input Falling Edge Or Input Level Low
+ * |[n]     |IF_ENn    |Port [A/B/C/E/F] Interrupt Enable By Input Falling Edge Or Input Level Low
  * |        |          |IF_EN[n] is used to enable the interrupt for each of the corresponding input GPIO_PIN[n].
  * |        |          |Set bit to 1 also enable the pin wake-up function.
  * |        |          |When setting the IF_EN[n] bit to 1:
@@ -145,7 +145,7 @@ typedef struct
  * |        |          |the interrupt.
  * |        |          |0 = PIN[n] state low-level or high-to-low change interrupt Disabled.
  * |        |          |1 = PIN[n] state low-level or high-to-low change interrupt Enabled.
- * |        |          |Note: Max. n = 3 for GPIOF; Max. n = 15 for GPIOA/GPIOB/GPIOC/GPIOD/GPIOE.
+ * |        |          |Note: Max. n = 3 for GPIOF; Max. n = 15 for GPIOA/GPIOB/GPIOC/GPIOE.
  * |[n+16]  |IR_ENn    |Port [A/B/C/D/E/F] Interrupt Enable By Input Rising Edge Or Input Level High
  * |        |          |IR_EN[n] used to enable the interrupt for each of the corresponding input GPIO_PIN[n].
  * |        |          |Set bit to 1 also enable the pin wake-up function.
@@ -156,7 +156,7 @@ typedef struct
  * |        |          |the interrupt.
  * |        |          |0 = PIN[n] level-high or low-to-high interrupt Disabled.
  * |        |          |1 = PIN[n] level-high or low-to-high interrupt Enabled.
- * |        |          |Note: Max. n = 3 for GPIOF; Max. n = 15 for GPIOA/GPIOB/GPIOC/GPIOD/GPIOE.
+ * |        |          |Note: Max. n = 3 for GPIOF; Max. n = 15 for GPIOA/GPIOB/GPIOC/GPIOE.
  * @var GPIO_T::ISRC
  * Offset: 0x20  GPIO Port [A/B/C/D/E/F] Interrupt Source Flag
  * ---------------------------------------------------------------------------------------------------
@@ -168,19 +168,19 @@ typedef struct
  * |        |          |1 = GPIOx[n] generates an interrupt.
  * |        |          |Write :
  * |        |          |0= No action.
- * |        |          |1= Clear the corresponding pending interrupt. 
- * |        |          |Note: Max. n = 3 for GPIOF; Max. n = 15 for GPIOA/GPIOB/GPIOC/GPIOD/GPIOE. 
+ * |        |          |1= Clear the corresponding pending interrupt.
+ * |        |          |Note: Max. n = 3 for GPIOF; Max. n = 15 for GPIOA/GPIOB/GPIOC/GPIOE.
  */
 
-    __IO uint32_t PMD;           /* Offset: 0x00  GPIO Port [A/B/C/D/E/F] Pin I/O Mode Control                       */
-    __IO uint32_t OFFD;          /* Offset: 0x04  GPIO Port [A/B/C/D/E/F] Pin Digital Input Path Disable Control     */
-    __IO uint32_t DOUT;          /* Offset: 0x08  GPIO Port [A/B/C/D/E/F] Data Output Value                          */
-    __IO uint32_t DMASK;         /* Offset: 0x0C  GPIO Port [A/B/C/D/E/F] Data Output Write Mask                     */
-    __I  uint32_t PIN;           /* Offset: 0x10  GPIO Port [A/B/C/D/E/F] Pin Value                                  */
-    __IO uint32_t DBEN;          /* Offset: 0x14  GPIO Port [A/B/C/D/E/F] De-bounce Enable                           */
-    __IO uint32_t IMD;           /* Offset: 0x18  GPIO Port [A/B/C/D/E/F] Interrupt Mode Control                     */
-    __IO uint32_t IEN;           /* Offset: 0x1C  GPIO Port [A/B/C/D/E/F] Interrupt Enable                           */
-    __IO uint32_t ISRC;          /* Offset: 0x20  GPIO Port [A/B/C/D/E/F] Interrupt Source Flag                      */
+    __IO uint32_t PMD;           /* Offset: 0x00  GPIO Port [A/B/C/E/F] Pin I/O Mode Control                       */
+    __IO uint32_t OFFD;          /* Offset: 0x04  GPIO Port [A/B/C/E/F] Pin Digital Input Path Disable Control     */
+    __IO uint32_t DOUT;          /* Offset: 0x08  GPIO Port [A/B/C/E/F] Data Output Value                          */
+    __IO uint32_t DMASK;         /* Offset: 0x0C  GPIO Port [A/B/C/E/F] Data Output Write Mask                     */
+    __I  uint32_t PIN;           /* Offset: 0x10  GPIO Port [A/B/C/E/F] Pin Value                                  */
+    __IO uint32_t DBEN;          /* Offset: 0x14  GPIO Port [A/B/C/E/F] De-bounce Enable                           */
+    __IO uint32_t IMD;           /* Offset: 0x18  GPIO Port [A/B/C/E/F] Interrupt Mode Control                     */
+    __IO uint32_t IEN;           /* Offset: 0x1C  GPIO Port [A/B/C/E/F] Interrupt Enable                           */
+    __IO uint32_t ISRC;          /* Offset: 0x20  GPIO Port [A/B/C/E/F] Interrupt Source Flag                      */
 
 } GPIO_T;
 
