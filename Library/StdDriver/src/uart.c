@@ -26,7 +26,7 @@
 /**
  *    @brief        Clear UART specified interrupt flag
  *
- *    @param[in]    uart                The base address of UART module.
+ *    @param[in]    uart                The pointer of the specified UART module.
  *    @param[in]    u32InterruptFlag    The specified interrupt of UART module.
  *                                      - UART_ISR_LIN_INT_Msk     : LIN bus interrupt
  *                                      - UART_ISR_BUF_ERR_INT_Msk : Buffer Error interrupt
@@ -67,7 +67,7 @@ void UART_ClearIntFlag(UART_T* uart , uint32_t u32InterruptFlag)
 /**
  *  @brief      Disable UART interrupt
  *
- *  @param[in]  uart The base address of UART module.
+ *  @param[in]  uart The pointer of the specified UART module.
  *
  *  @return     None
  *
@@ -82,7 +82,7 @@ void UART_Close(UART_T* uart)
 /**
  *  @brief      Disable UART auto flow control function
  *
- *  @param[in]  uart The base address of UART module.
+ *  @param[in]  uart The pointer of the specified UART module.
  *
  *  @return     None
  *
@@ -97,7 +97,7 @@ void UART_DisableFlowCtrl(UART_T* uart)
 /**
  *    @brief        Disable UART specified interrupt
  *
- *    @param[in]    uart                The base address of UART module.
+ *    @param[in]    uart                The pointer of the specified UART module.
  *    @param[in]    u32InterruptFlag    The specified interrupt of UART module.
  *                                  - UART_IER_LIN_IEN_Msk        : LIN bus interrupt
  *                                  - UART_IER_WAKE_EN_Msk        : Wakeup interrupt
@@ -130,11 +130,11 @@ void UART_DisableInt(UART_T*  uart, uint32_t u32InterruptFlag)
 /**
  *    @brief        Enable UART auto flow control function
  *
- *    @param[in]    uart    The base address of UART module.
+ *    @param[in]    uart    The pointer of the specified UART module.
  *
  *    @return       None
  *
- *    @details      The function is used to Enable UART auto flow control.
+ *    @details      The function is used to enable UART auto flow control.
  */
 void UART_EnableFlowCtrl(UART_T* uart)
 {
@@ -152,7 +152,7 @@ void UART_EnableFlowCtrl(UART_T* uart)
 /**
  *    @brief        Enable UART specified interrupt
  *
- *    @param[in]    uart                The base address of UART module.
+ *    @param[in]    uart                The pointer of the specified UART module.
  *    @param[in]    u32InterruptFlag    The specified interrupt of UART module:
  *                                      - UART_IER_LIN_IEN_Msk        : LIN bus interrupt
  *                                      - UART_IER_WAKE_EN_Msk        : Wakeup interrupt
@@ -185,9 +185,9 @@ void UART_EnableInt(UART_T*  uart, uint32_t u32InterruptFlag)
 
 
 /**
- *    @brief        Open and set UART fuction
+ *    @brief        Open and set UART function
  *
- *    @param[in]    uart            The base address of UART module.
+ *    @param[in]    uart            The pointer of the specified UART module.
  *    @param[in]    u32baudrate     The baudrate of UART module.
  *
  *    @return       None
@@ -235,13 +235,13 @@ void UART_Open(UART_T* uart, uint32_t u32baudrate)
 /**
  *    @brief        Read UART data
  *
- *    @param[in]    uart            The base address of UART module.
+ *    @param[in]    uart            The pointer of the specified UART module.
  *    @param[in]    pu8RxBuf        The buffer to receive the data of receive FIFO.
- *    @param[in]    u32ReadBytes    The the read bytes number of data.
+ *    @param[in]    u32ReadBytes    The read bytes number of data.
  *
  *    @return       u32Count Receive byte count
  *
- *    @details       The function is used to read Rx data from RX FIFO and the data will be stored in pu8RxBuf.
+ *    @details      The function is used to read Rx data from RX FIFO and the data will be stored in pu8RxBuf.
  */
 uint32_t UART_Read(UART_T* uart, uint8_t *pu8RxBuf, uint32_t u32ReadBytes)
 {
@@ -255,7 +255,7 @@ uint32_t UART_Read(UART_T* uart, uint8_t *pu8RxBuf, uint32_t u32ReadBytes)
         {
             u32delayno++;
             if(u32delayno >= 0x40000000)
-                return FALSE;
+                return u32Count;
         }
         pu8RxBuf[u32Count] = uart->RBR;    /* Get Data from UART RX  */
     }
@@ -268,8 +268,8 @@ uint32_t UART_Read(UART_T* uart, uint8_t *pu8RxBuf, uint32_t u32ReadBytes)
 /**
  *    @brief        Set UART line configuration
  *
- *    @param[in]    uart            The base address of UART module.
- *    @param[in]    u32baudrate     The register value of baudrate of UART module.
+ *    @param[in]    uart            The pointer of the specified UART module.
+ *    @param[in]    u32baudrate     The baudrate of UART module.
  *                                  If u32baudrate = 0, UART baudrate will not change.
  *    @param[in]    u32data_width   The data length of UART module.
  *                                  - UART_WORD_LEN_5
@@ -327,7 +327,7 @@ void UART_SetLine_Config(UART_T* uart, uint32_t u32baudrate, uint32_t u32data_wi
 /**
  *    @brief        Set Rx timeout count
  *
- *    @param[in]    uart    The base address of UART module.
+ *    @param[in]    uart    The pointer of the specified UART module.
  *    @param[in]    u32TOC  Rx timeout counter.
  *
  *    @return       None
@@ -347,7 +347,7 @@ void UART_SetTimeoutCnt(UART_T* uart, uint32_t u32TOC)
 /**
  *    @brief        Select and configure IrDA function
  *
- *    @param[in]    uart            The base address of UART module.
+ *    @param[in]    uart            The pointer of the specified UART module.
  *    @param[in]    u32Buadrate     The baudrate of UART module.
  *    @param[in]    u32Direction    The direction(transmit:1/receive:0) of UART module in IrDA mode:
  *                                  - UART_IRCR_TX_SELECT
@@ -402,7 +402,7 @@ void UART_SelectIrDAMode(UART_T* uart, uint32_t u32Buadrate, uint32_t u32Directi
 /**
  *    @brief        Select and configure RS485 function
  *
- *    @param[in]    uart        The base address of UART module.
+ *    @param[in]    uart        The pointer of the specified UART module.
  *    @param[in]    u32Mode     The operation mode(NMM/AUD/AAD).
  *                              - UART_ALT_CSR_RS485_NMM_Msk
  *                              - UART_ALT_CSR_RS485_AUD_Msk
@@ -418,7 +418,7 @@ void UART_SelectRS485Mode(UART_T* uart, uint32_t u32Mode, uint32_t u32Addr)
     /* Select UART RS485 function mode */
     uart->FUN_SEL = UART_FUNC_SEL_RS485;
 
-    /* Set RS585 configuration */
+    /* Set RS485 configuration */
     uart->ALT_CSR &= ~(UART_ALT_CSR_RS485_NMM_Msk | UART_ALT_CSR_RS485_AUD_Msk | UART_ALT_CSR_RS485_AAD_Msk | UART_ALT_CSR_ADDR_MATCH_Msk);
     uart->ALT_CSR |= (u32Mode | (u32Addr << UART_ALT_CSR_ADDR_MATCH_Pos));
 }
@@ -427,7 +427,7 @@ void UART_SelectRS485Mode(UART_T* uart, uint32_t u32Mode, uint32_t u32Addr)
 /**
  *    @brief        Select and configure LIN function
  *
- *    @param[in]    uart            The base address of UART module.
+ *    @param[in]    uart            The pointer of the specified UART module.
  *    @param[in]    u32Mode         The LIN direction :
  *                                  - UART_ALT_CSR_LIN_TX_EN_Msk
  *                                  - UART_ALT_CSR_LIN_RX_EN_Msk
@@ -451,7 +451,7 @@ void UART_SelectLINMode(UART_T* uart, uint32_t u32Mode, uint32_t u32BreakLength)
 /**
  *    @brief        Write UART data
  *
- *    @param[in]    uart            The base address of UART module.
+ *    @param[in]    uart            The pointer of the specified UART module.
  *    @param[in]    pu8TxBuf        The buffer to send the data to UART transmission FIFO.
  *    @param[out]   u32WriteBytes   The byte number of data.
  *
@@ -466,11 +466,11 @@ uint32_t UART_Write(UART_T* uart, uint8_t *pu8TxBuf, uint32_t u32WriteBytes)
     for(u32Count = 0; u32Count != u32WriteBytes; u32Count++)
     {
         u32delayno = 0;
-        while((uart->FSR & UART_FSR_TE_FLAG_Msk) == 0)   /* Wait Tx empty and Time-out manner */
+        while(uart->FSR & UART_FSR_TX_FULL_Msk)   /* Wait Tx not full or Time-out manner */
         {
             u32delayno++;
             if(u32delayno >= 0x40000000)
-                return FALSE;
+                return u32Count;
         }
         uart->THR = pu8TxBuf[u32Count];    /* Send UART Data from buffer */
     }
@@ -487,6 +487,3 @@ uint32_t UART_Write(UART_T* uart, uint8_t *pu8TxBuf, uint32_t u32WriteBytes)
 /*@}*/ /* end of group Standard_Driver */
 
 /*** (C) COPYRIGHT 2018 Nuvoton Technology Corp. ***/
-
-
-
