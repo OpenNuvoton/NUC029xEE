@@ -6,8 +6,9 @@
  * @brief    Measure AVDD voltage by ADC.
  *
  * @note
- * Copyright (C) 2018 Nuvoton Technology Corp. All rights reserved.
+ * @copyright SPDX-License-Identifier: Apache-2.0
  *
+ * @copyright Copyright (C) 2018 Nuvoton Technology Corp. All rights reserved.
  ******************************************************************************/
 #include <stdio.h>
 #include "NuMicro.h"
@@ -235,7 +236,7 @@ uint32_t GetAVDDCodeByADC(void)
 /*---------------------------------------------------------------------------------------------------------*/
 /* MAIN function                                                                                           */
 /*---------------------------------------------------------------------------------------------------------*/
-main(void)
+int main(void)
 {
     uint32_t u32AVDDVoltage;
 

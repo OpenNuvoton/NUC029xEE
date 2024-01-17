@@ -4,7 +4,8 @@
  * @version  0x31
  *
  * @note
- * Copyright (C) 2019 Nuvoton Technology Corp. All rights reserved.
+ * @copyright SPDX-License-Identifier: Apache-2.0
+ * @copyright Copyright (C) 2018 Nuvoton Technology Corp. All rights reserved.
  ******************************************************************************/
 #include "NuMicro.h"
 #include "uart_transfer.h"
@@ -12,8 +13,8 @@
 
 #define DetectPin   				PA10
 
-extern __align(4) uint8_t response_buff[64];
-extern __align(4) uint8_t usb_rcvbuf[64];
+extern __attribute__((aligned(4))) uint8_t response_buff[64];
+extern __attribute__((aligned(4))) uint8_t usb_rcvbuf[64];
 extern uint8_t bUsbDataReady;
 
 

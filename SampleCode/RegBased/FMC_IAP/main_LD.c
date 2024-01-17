@@ -6,8 +6,9 @@
  * @brief    NUC029xEE Series Flash Memory Controller Driver Sample Code on LDROM
  *
  * @note
- * Copyright (C) 2018 Nuvoton Technology Corp. All rights reserved.
+ * @copyright SPDX-License-Identifier: Apache-2.0
  *
+ * @copyright Copyright (C) 2018 Nuvoton Technology Corp. All rights reserved.
  ******************************************************************************/
 #include <stdio.h>
 #include "NuMicro.h"
@@ -34,19 +35,20 @@ __root const uint32_t g_funcTable[4] =
     (uint32_t)IAP_Func0, (uint32_t)IAP_Func1, (uint32_t)IAP_Func2, (uint32_t)IAP_Func3
 } ;
 #else
-#if defined(__GNUC__)
+#if defined(__GNUC_LD_IAP__)
 const uint32_t __attribute__((section (".IAPFunTable"))) g_funcTable[4] =
 {
     (uint32_t)IAP_Func0, (uint32_t)IAP_Func1, (uint32_t)IAP_Func2, (uint32_t)IAP_Func3
 };
 #else
-__attribute__((at(FUN_TBL_BASE))) const uint32_t g_funcTable[4] =
+const uint32_t * __attribute__((section(".ARM.__at_0x00100E00"))) g_funcTable[4] =
 {
-    (uint32_t)IAP_Func0, (uint32_t)IAP_Func1, (uint32_t)IAP_Func2, (uint32_t)IAP_Func3
+    (uint32_t *)IAP_Func0, (uint32_t *)IAP_Func1, (uint32_t *)IAP_Func2, (uint32_t *)IAP_Func3
 };
 #endif
 #endif
 
+void ProcessHardFault(void){}
 
 void SysTickDelay(uint32_t us)
 {
@@ -60,6 +62,7 @@ void SysTickDelay(uint32_t us)
 
 void SYS_Init(void)
 {
+
     /*---------------------------------------------------------------------------------------------------------*/
     /* Init System Clock                                                                                       */
     /*---------------------------------------------------------------------------------------------------------*/
@@ -89,7 +92,7 @@ void SYS_Init(void)
     CLK->CLKSEL0 |= CLK_CLKSEL0_HCLK_S_PLL;
 
     /* Update System Core Clock */
-    /* User can use SystemCoreClockUpdate() to calculate PllClock, SystemCoreClock and CycylesPerUs automatically. */
+    /* User can use SystemCoreClockUpdate() to calculate PllClock, SystemCoreClock and CyclesPerUs automatically. */
     //SystemCoreClockUpdate();
     PllClock        = PLL_CLOCK;            // PLL
     SystemCoreClock = PLL_CLOCK / 1;        // HCLK
@@ -127,60 +130,64 @@ void UART0_Init(void)
 
 int32_t IAP_Func0(int32_t n)
 {
-#if defined(__GNUC__)
+#if defined(__GNUC_LD_IAP__)
     return (n * 1);
 #else
     int32_t i;
 
-    for(i = 0; i < n; i++) {
+    for(i = 0; i < n; i++)
+    {
         printf("Hello IAP0! #%d\n", i);
     }
 
     return n;
-#endif
+#endif    
 }
 
 int32_t IAP_Func1(int32_t n)
 {
-#if defined(__GNUC__)
+#if defined(__GNUC_LD_IAP__)
     return (n * 2);
 #else
     int32_t i;
 
-    for(i = 0; i < n; i++) {
-        printf("Hello IAP1! #%d\n", i);
+    for(i = 0; i < n; i++)
+    {
+    	printf("Hello IAP1! #%d\n", i);
     }
 
     return n;
-#endif
+#endif    
 }
 int32_t IAP_Func2(int32_t n)
 {
-#if defined(__GNUC__)
-    return (n * 2);
+#if defined(__GNUC_LD_IAP__)
+    return (n * 3);
 #else
     int32_t i;
 
-    for(i = 0; i < n; i++) {
-        printf("Hello IAP2! #%d\n", i);
+    for(i = 0; i < n; i++)
+    {
+    	printf("Hello IAP2! #%d\n", i);
     }
 
     return n;
-#endif
+#endif    
 }
 int32_t IAP_Func3(int32_t n)
 {
-#if defined(__GNUC__)
-    return (n * 2);
+#if defined(__GNUC_LD_IAP__)
+    return (n * 4);
 #else
     int32_t i;
 
-    for(i = 0; i < n; i++) {
-        printf("Hello IAP3! #%d\n", i);
+    for(i = 0; i < n; i++)
+    {
+    	printf("Hello IAP3! #%d\n", i);
     }
 
     return n;
-#endif
+#endif    
 }
 
 /*---------------------------------------------------------------------------------------------------------*/
@@ -194,7 +201,7 @@ int32_t main(void)
     SYS_Init();
 
 #if defined(__GNUC_LD_IAP__)
-        
+
     // Delay 3 seconds
     for(i = 0; i < 30; i++)
     {
@@ -202,7 +209,6 @@ int32_t main(void)
     }
 
     while(SYS->PDID)__WFI();
-
 #else
 
     /* Init UART0 for printf */
@@ -221,16 +227,16 @@ int32_t main(void)
     printf("\nCPU @ %dHz\n\n", SystemCoreClock);
 
     // Delay 3 seconds
-    for(i = 0; i < 30; i++) {
+    for(i = 0; i < 30; i++)
+    {
         printf(".");
         SysTickDelay(10000);
     }
     printf("\n");
 
-    printf("Function table @ 0x%08x\n", g_funcTable);
+    printf("Function table @ 0x%08x\n", (uint32_t)g_funcTable);
 
     while(SYS->PDID)__WFI();
-
 #endif
 }
 

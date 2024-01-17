@@ -6,8 +6,9 @@
  * @brief    NUC029xEE Series IAP function sample code
  *
  * @note
- * Copyright (C) 2018 Nuvoton Technology Corp. All rights reserved.
+ * @copyright SPDX-License-Identifier: Apache-2.0
  *
+ * @copyright Copyright (C) 2018 Nuvoton Technology Corp. All rights reserved.
  ******************************************************************************/
 #include <stdio.h>
 #include "NuMicro.h"
@@ -24,6 +25,8 @@ extern uint32_t loaderImageLimit;
 uint32_t g_u32ImageSize;
 
 uint32_t *g_au32funcTable = (uint32_t *)0x100e00; /* The location of function table */
+
+int32_t g_FMC_i32ErrCode;
 
 void SYS_Init(void)
 {
@@ -91,6 +94,9 @@ void UART0_Init(void)
     UART0->LCR = UART_WORD_LEN_8 | UART_PARITY_NONE | UART_STOP_BIT_1;
 }
 
+#if defined ( __ICCARM__ )
+#pragma optimize=low
+#endif
 void FMC_LDROM_Test(void)
 {
     int32_t  i32Err;
@@ -108,10 +114,12 @@ void FMC_LDROM_Test(void)
     /* Erase Verify */
     i32Err = 0;
 
-    for(i = FMC_LDROM_BASE; i < (FMC_LDROM_BASE + FMC_LDROM_SIZE); i += 4) {
+    for(i = FMC_LDROM_BASE; i < (FMC_LDROM_BASE + FMC_LDROM_SIZE); i += 4)
+    {
         u32Data = FMC_Read(i);
 
-        if(u32Data != 0xFFFFFFFF) {
+        if(u32Data != 0xFFFFFFFF)
+        {
             i32Err = 1;
         }
     }
@@ -124,9 +132,11 @@ void FMC_LDROM_Test(void)
     printf("  Program Simple LD Code ..................... ");
     pu32Loader = (uint32_t *)&loaderImageBase;
     g_u32ImageSize = (uint32_t)&loaderImageLimit - (uint32_t)&loaderImageBase;
-    for(i = 0; i < g_u32ImageSize; i += 4) {
+    for(i = 0; i < g_u32ImageSize; i += 4)
+    {
         /* Erase page when necessary */
-        if((i & (FMC_FLASH_PAGE_SIZE - 1)) == 0) {
+        if((i & (FMC_FLASH_PAGE_SIZE - 1)) == 0)
+        {
             FMC_Erase(FMC_LDROM_BASE + i);
         }
 
@@ -135,15 +145,19 @@ void FMC_LDROM_Test(void)
 
     /* Verify loader */
     i32Err = 0;
-    for(i = 0; i < g_u32ImageSize; i += 4) {
+    for(i = 0; i < g_u32ImageSize; i += 4)
+    {
         u32Data = FMC_Read(FMC_LDROM_BASE + i);
         if(u32Data != pu32Loader[i / 4])
             i32Err = 1;
     }
 
-    if(i32Err) {
+    if(i32Err)
+    {
         printf("[FAIL]\n");
-    } else {
+    }
+    else
+    {
         printf("[OK]\n");
     }
 }
@@ -189,9 +203,11 @@ int32_t main(void)
 
     /* Check IAP mode */
     u32Cfg = FMC_Read(FMC_CONFIG_BASE);
-    if((u32Cfg & 0xc0) != 0x80) {
-        printf("Do you want to set to new IAP mode (APROM boot + LDROM) y/n?\n");
-        if(getchar() == 'y') {
+    if((u32Cfg & 0xc0) != 0x80)
+    {
+        printf("Do you want to set to new IAP mode (APROM boot + LDROM) (y/n)?\n");
+        if(getchar() == 'y')
+        {
             FMC->ISPCON |= FMC_ISPCON_CFGUEN_Msk; /* Enable user configuration update */
 
             /* Set CBS to b'10 */
@@ -211,18 +227,21 @@ int32_t main(void)
         }
     }
 
-    printf("Do you want to write LDROM code to 0x100000\n");
+    printf("Do you want to write LDROM code to 0x100000 (y/n)?\n");
 
-    if(getchar() == 'y') {
+    if(getchar() == 'y')
+    {
         /* Check LD image size */
         g_u32ImageSize = (uint32_t)&loaderImageLimit - (uint32_t)&loaderImageBase;
 
-        if(g_u32ImageSize == 0) {
+        if(g_u32ImageSize == 0)
+        {
             printf("  ERROR: Loader Image is 0 bytes!\n");
             goto lexit;
         }
 
-        if(g_u32ImageSize > FMC_LDROM_SIZE) {
+        if(g_u32ImageSize > FMC_LDROM_SIZE)
+        {
             printf("  ERROR: Loader Image is larger than 4K Bytes!\n");
             goto lexit;
         }
@@ -231,15 +250,35 @@ int32_t main(void)
         FMC_LDROM_Test();
     }
 
-    for(i = 0; i < 4; i++) {
+#if defined(__GNUC_AP__)
+    for(i = 0; i < 4; i++)
+    {
         /* Call the function of LDROM */
         func = (int32_t (*)(int32_t))g_au32funcTable[i];
-        if(func(i + 1) == i + 1) {
+        if(func(i + 1) == ((i + 1)*(i + 1)))
+        {
             printf("Call LDROM function %d ok!\n", i);
-        } else {
+        }
+        else
+        {
             printf("Call LDROM function %d fail.\n", i);
         }
     }
+#else
+    for(i = 0; i < 4; i++)
+    {
+        /* Call the function of LDROM */
+        func = (int32_t (*)(int32_t))g_au32funcTable[i];
+        if(func(i + 1) == i + 1)
+        {
+            printf("Call LDROM function %d ok!\n", i);
+        }
+        else
+        {
+            printf("Call LDROM function %d fail.\n", i);
+        }
+    }
+ #endif
 
 lexit:
 

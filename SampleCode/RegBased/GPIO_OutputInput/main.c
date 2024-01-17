@@ -4,7 +4,8 @@
  * @brief    NUC029xEE Series GPIO Driver Sample Code
  *
  * @note
- * Copyright (C) 2018 Nuvoton Technology Corp. All rights reserved.
+ * @copyright SPDX-License-Identifier: Apache-2.0
+ * @copyright Copyright (C) 2018 Nuvoton Technology Corp. All rights reserved.
  ******************************************************************************/
 #include <stdio.h>
 #include "NuMicro.h"
@@ -48,7 +49,7 @@ void SYS_Init(void)
     CLK->CLKSEL0 = (CLK->CLKSEL0 & (~CLK_CLKSEL0_HCLK_S_Msk)) | CLK_CLKSEL0_HCLK_S_PLL;
 
     /* Update System Core Clock */
-    /* User can use SystemCoreClockUpdate() to calculate PllClock, SystemCoreClock and CycylesPerUs automatically. */
+    /* User can use SystemCoreClockUpdate() to calculate PllClock, SystemCoreClock and CyclesPerUs automatically. */
     //SystemCoreClockUpdate();
     PllClock        = PLL_CLOCK;            // PLL
     SystemCoreClock = PLL_CLOCK / 1;        // HCLK
@@ -106,29 +107,29 @@ int main(void)
 
     printf("\n\nCPU @ %d Hz\n", SystemCoreClock);
     printf("+-------------------------------------------------+\n");
-    printf("|    PB.2(Output) and PE.1(Input) Sample Code     |\n");
+    printf("|    PB.2(Output) and PE.5(Input) Sample Code     |\n");
     printf("+-------------------------------------------------+\n\n");
-    printf("  >> Please connect PB.2 and PE.1 first << \n");
+    printf("  >> Please connect PB.2 and PE.5 first << \n");
     printf("     Press any key to start test by using [Pin Data Input/Output Control] \n\n");
-    getchar();   
-    
-    /* Configure PB.2 as Output mode and PE.1 as Input mode */
+    getchar();
+
+    /* Configure PB.2 as Output mode and PE.5 as Input mode */
     PB->PMD = (PB->PMD & (~GPIO_PMD_PMD2_Msk)) | (GPIO_PMD_OUTPUT << GPIO_PMD_PMD2_Pos);
-    PE->PMD = (PE->PMD & (~GPIO_PMD_PMD1_Msk)) | (GPIO_PMD_INPUT << GPIO_PMD_PMD1_Pos);
+    PE->PMD = (PE->PMD & (~GPIO_PMD_PMD5_Msk)) | (GPIO_PMD_INPUT << GPIO_PMD_PMD5_Pos);
 
     i32Err = 0;
-    printf("GPIO PB.2(output mode) connect to PE.1(input mode) ......");
+    printf("GPIO PB.2(output mode) connect to PE.5(input mode) ......");
 
     /* Use Pin Data Input/Output Control to pull specified I/O or get I/O pin status */
-    /* Pull PB.2 to Low and check PE.1 status */
+    /* Pull PB.2 to Low and check PE.5 status */
     PB2 = 0;
-    if(PE1 != 0) {
+    if(PE5 != 0) {
         i32Err = 1;
     }
 
-    /* Pull PB.2 to High and check PE.1 status */
+    /* Pull PB.2 to High and check PE.5 status */
     PB2 = 1;
-    if(PE1 != 1) {
+    if(PE5 != 1) {
         i32Err = 1;
     }
 
@@ -138,9 +139,9 @@ int main(void)
         printf("  [OK].\n");
     }
 
-    /* Configure PB.2 and PE.1 to default Quasi-bidirectional mode */
+    /* Configure PB.2 and PE.5 to default Quasi-bidirectional mode */
     PB->PMD = (PB->PMD & (~GPIO_PMD_PMD2_Msk)) | (GPIO_PMD_QUASI << GPIO_PMD_PMD2_Pos);
-    PE->PMD = (PE->PMD & (~GPIO_PMD_PMD1_Msk)) | (GPIO_PMD_QUASI << GPIO_PMD_PMD1_Pos);
+    PE->PMD = (PE->PMD & (~GPIO_PMD_PMD5_Msk)) | (GPIO_PMD_QUASI << GPIO_PMD_PMD5_Pos);
 
     while(1);
 }

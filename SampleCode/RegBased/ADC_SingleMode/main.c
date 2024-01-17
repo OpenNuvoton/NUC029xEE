@@ -6,8 +6,9 @@
  * @brief    NUC029xEE Series ADC Interface Controller Driver Sample Code
  *
  * @note
- * Copyright (C) 2018 Nuvoton Technology Corp. All rights reserved.
+ * @copyright SPDX-License-Identifier: Apache-2.0
  *
+ * @copyright Copyright (C) 2018 Nuvoton Technology Corp. All rights reserved.
  ******************************************************************************/
 #include <stdio.h>
 #include "NuMicro.h"
@@ -220,7 +221,7 @@ void ADC_IRQHandler(void)
 /*---------------------------------------------------------------------------------------------------------*/
 /* MAIN function                                                                                           */
 /*---------------------------------------------------------------------------------------------------------*/
-main(void)
+int main(void)
 {
 
     /* Unlock protected registers */
