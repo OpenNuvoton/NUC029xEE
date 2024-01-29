@@ -74,8 +74,8 @@ extern "C"
 /*---------------------------------------------------------------------------------------------------------*/
 /* UART RTS LEVEL TRIGGER constants definitions                                                            */
 /*---------------------------------------------------------------------------------------------------------*/
-#define UART_RTS_IS_HIGH_LEV_ACTIVE    (0x1 << UART_MCR_LEV_RTS_Pos) /*!< Set RTS is High Level Active */
-#define UART_RTS_IS_LOW_LEV_ACTIVE     (0x0 << UART_MCR_LEV_RTS_Pos) /*!< Set RTS is Low Level Active */
+#define UART_RTS_IS_HIGH_LEV_ACTIVE    (0x0 << UART_MCR_LEV_RTS_Pos) /*!< Set RTS is High Level Active */
+#define UART_RTS_IS_LOW_LEV_ACTIVE     (0x1 << UART_MCR_LEV_RTS_Pos) /*!< Set RTS is Low Level Active */
 
 /*---------------------------------------------------------------------------------------------------------*/
 /* UA_IRCR constants definitions                                                                           */
