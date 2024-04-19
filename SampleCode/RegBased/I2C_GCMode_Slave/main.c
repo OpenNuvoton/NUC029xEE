@@ -128,7 +128,7 @@ void SYS_Init(void)
 
     /* System optimization when CPU runs at 72MHz */
     FMC->FATCON |= 0x50;
-    
+
     /* Set core clock as PLL_CLOCK from PLL */
     CLK->PLLCON = PLLCON_SETTING;
     while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_PLL_STB_Msk));
@@ -136,11 +136,11 @@ void SYS_Init(void)
     CLK->CLKSEL0 |= CLK_CLKSEL0_HCLK_S_PLL;
 
     /* Update System Core Clock */
-    /* User can use SystemCoreClockUpdate() to calculate PllClock, SystemCoreClock and CycylesPerUs automatically. */
+    /* User can use SystemCoreClockUpdate() to calculate PllClock, SystemCoreClock and CyclesPerUs automatically. */
     //SystemCoreClockUpdate();
     PllClock        = PLL_CLOCK;            // PLL
     SystemCoreClock = PLL_CLOCK / 1;        // HCLK
-    CyclesPerUs     = PLL_CLOCK / 1000000;  // For SYS_SysTickDelay()
+    CyclesPerUs     = PLL_CLOCK / 1000000;  // For CLK_SysTickDelay()
 
     /* Enable UART & I2C0 module clock */
     CLK->APBCLK |= (CLK_APBCLK_UART0_EN_Msk | CLK_APBCLK_I2C0_EN_Msk);
@@ -288,11 +288,13 @@ int32_t main(void)
         if(g_au8SlvData[i] != g_au8SlvTxData[2])
         {
             printf("GC Mode Receive data fail.\n");
-            while(1);
+            goto lexit;
         }
     }
 
     printf("GC Mode receive data OK.\n");
+
+lexit:
 
     s_I2C0HandlerFn = NULL;
 

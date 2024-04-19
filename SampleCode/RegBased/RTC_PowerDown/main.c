@@ -26,10 +26,14 @@ volatile uint8_t g_u8IsRTCAlarmINT = 0;
 /*---------------------------------------------------------------------------------------------------------*/
 void PowerDownFunction(void)
 {
+    uint32_t u32TimeOutCnt;
+
     printf("\nSystem enter to power-down mode ...\n");
 
     /* To check if all the debug messages are finished */
-    while(IsDebugFifoEmpty() == 0);
+    u32TimeOutCnt = SystemCoreClock; /* 1 second time-out */
+    while(IsDebugFifoEmpty() == 0)
+        if(--u32TimeOutCnt == 0) break;
 
     SCB->SCR = 4;
 
@@ -104,7 +108,7 @@ void SYS_Init(void)
     CLK->CLKSEL1 = CLK_CLKSEL1_UART_S_PLL;
 
     /* Update System Core Clock */
-    /* User can use SystemCoreClockUpdate() to calculate PllClock, SystemCoreClock and CycylesPerUs automatically. */
+    /* User can use SystemCoreClockUpdate() to calculate PllClock, SystemCoreClock and CyclesPerUs automatically. */
     SystemCoreClockUpdate();
 
     /*---------------------------------------------------------------------------------------------------------*/
@@ -134,6 +138,8 @@ void UART0_Init(void)
 /*---------------------------------------------------------------------------------------------------------*/
 int main(void)
 {
+    uint32_t u32TimeOutCnt;
+
     /* Unlock protected registers */
     SYS_UnlockReg();
 
@@ -154,7 +160,14 @@ int main(void)
     /* Initial RTC and stay in normal state */
     if(RTC->INIR != 0x1) {
         RTC->INIR = RTC_INIT_KEY;
-        while(RTC->INIR != 0x1);
+        u32TimeOutCnt = SystemCoreClock; /* 1 second time-out */
+        while(RTC->INIR != 0x1) {
+            if(--u32TimeOutCnt == 0) {
+                printf("\n RTC initial fail!!");
+                printf("\n Please check h/w setting!!");
+                goto lexit;
+            }
+        }
     }
 
     /* Setting RTC current date/time */
@@ -183,13 +196,21 @@ int main(void)
     SYS_UnlockReg();
     PowerDownFunction();
 
-    while(g_u8IsRTCAlarmINT == 0);
+    u32TimeOutCnt = SystemCoreClock; /* 1 second time-out */
+    while(g_u8IsRTCAlarmINT == 0) {
+        if(--u32TimeOutCnt == 0) {
+            printf("Wait for RTC alarm interrupt time-out!");
+            break;
+        }
+    }
 
     /* Read current RTC date/time */
     printf("System has been waken-up and current date/time is:\n");
     printf("    20%02x/%02x/%02x %02x:%02x:%02x\n",
            (RTC->CLR >> RTC_CLR_1YEAR_Pos) & 0xFF, (RTC->CLR >> RTC_CLR_1MON_Pos) & 0xFF, (RTC->CLR >> RTC_CLR_1DAY_Pos) & 0xFF,
            (RTC->TLR >> RTC_TLR_1HR_Pos) & 0xFF, (RTC->TLR >> RTC_TLR_1MIN_Pos) & 0xFF, (RTC->TLR >> RTC_TLR_1SEC_Pos) & 0xFF);
+
+lexit:
 
     while(1);
 }

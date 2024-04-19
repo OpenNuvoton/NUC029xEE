@@ -42,15 +42,15 @@ extern "C"
 /* UA_FCR constants definitions                                                                            */
 /*---------------------------------------------------------------------------------------------------------*/
 
-#define UART_FCR_RFITL_1BYTE        (0x0 << UART_FCR_RFITL_Pos)   /*!< UA_FCR setting to set RX FIFO Trigger Level to 1 bit */
-#define UART_FCR_RFITL_4BYTES       (0x1 << UART_FCR_RFITL_Pos)   /*!< UA_FCR setting to set RX FIFO Trigger Level to 4 bits */
-#define UART_FCR_RFITL_8BYTES       (0x2 << UART_FCR_RFITL_Pos)   /*!< UA_FCR setting to set RX FIFO Trigger Level to 8 bits */
-#define UART_FCR_RFITL_14BYTES      (0x3 << UART_FCR_RFITL_Pos)   /*!< UA_FCR setting to set RX FIFO Trigger Level to 14 bits */
+#define UART_FCR_RFITL_1BYTE        (0x0 << UART_FCR_RFITL_Pos)   /*!< UA_FCR setting to set RX FIFO Trigger Level to 1 byte */
+#define UART_FCR_RFITL_4BYTES       (0x1 << UART_FCR_RFITL_Pos)   /*!< UA_FCR setting to set RX FIFO Trigger Level to 4 bytes */
+#define UART_FCR_RFITL_8BYTES       (0x2 << UART_FCR_RFITL_Pos)   /*!< UA_FCR setting to set RX FIFO Trigger Level to 8 bytes */
+#define UART_FCR_RFITL_14BYTES      (0x3 << UART_FCR_RFITL_Pos)   /*!< UA_FCR setting to set RX FIFO Trigger Level to 14 bytes */
 
-#define UART_FCR_RTS_TRI_LEV_1BYTE        (0x0 << UART_FCR_RTS_TRI_LEV_Pos)  /*!< UA_FCR setting to set RTS Trigger Level to 1 bit */
-#define UART_FCR_RTS_TRI_LEV_4BYTES       (0x1 << UART_FCR_RTS_TRI_LEV_Pos)  /*!< UA_FCR setting to set RTS Trigger Level to 4 bits */
-#define UART_FCR_RTS_TRI_LEV_8BYTES       (0x2 << UART_FCR_RTS_TRI_LEV_Pos)  /*!< UA_FCR setting to set RTS Trigger Level to 8 bits */
-#define UART_FCR_RTS_TRI_LEV_14BYTES      (0x3 << UART_FCR_RTS_TRI_LEV_Pos)  /*!< UA_FCR setting to set RTS Trigger Level to 14 bits */
+#define UART_FCR_RTS_TRI_LEV_1BYTE        (0x0 << UART_FCR_RTS_TRI_LEV_Pos)  /*!< UA_FCR setting to set RTS Trigger Level to 1 byte */
+#define UART_FCR_RTS_TRI_LEV_4BYTES       (0x1 << UART_FCR_RTS_TRI_LEV_Pos)  /*!< UA_FCR setting to set RTS Trigger Level to 4 bytes */
+#define UART_FCR_RTS_TRI_LEV_8BYTES       (0x2 << UART_FCR_RTS_TRI_LEV_Pos)  /*!< UA_FCR setting to set RTS Trigger Level to 8 bytes */
+#define UART_FCR_RTS_TRI_LEV_14BYTES      (0x3 << UART_FCR_RTS_TRI_LEV_Pos)  /*!< UA_FCR setting to set RTS Trigger Level to 14 bytes */
 
 /*---------------------------------------------------------------------------------------------------------*/
 /* UA_LCR constants definitions                                                                            */
@@ -291,7 +291,7 @@ extern "C"
 /**
  *    @brief        Enable specified UART interrupt
  *
- *    @param[in]    uart        The base address of UART module
+ *    @param[in]    uart        The pointer of the specified UART module
  *    @param[in]    u32eIntSel  Interrupt type select
  *                              - UART_IER_LIN_IEN_Msk      : Lin bus interrupt
  *                              - UART_IER_WAKE_EN_Msk      : Wakeup interrupt
@@ -398,11 +398,11 @@ __STATIC_INLINE void UART_SET_RTS(UART_T* uart)
 /**
  *    @brief        Clear RS-485 Address Byte Detection Flag
  *
- *    @param[in]    uart    The base address of UART module
+ *    @param[in]    uart    The pointer of the specified UART module
  *
  *    @return       None
  *
- *    @details      This macro clear RS-485address byte detection flag.
+ *    @details      This macro clear RS-485 address byte detection flag.
  */
 #define UART_RS485_CLEAR_ADDR_FLAG(uart)    ((uart)->FSR = UART_FSR_RS485_ADD_DETF_Msk)
 
@@ -410,16 +410,17 @@ __STATIC_INLINE void UART_SET_RTS(UART_T* uart)
 /**
  *    @brief        Get RS-485 Address Byte Detection Flag
  *
- *    @param[in]    uart    The base address of UART module
+ *    @param[in]    uart    The pointer of the specified UART module
  *
- *    @return       RS-485 Address Byte Detection Flag
+ *    @retval       0 Receiver detects a data that is not an address bit.
+ *    @retval       1 Receiver detects a data that is an address bit.
  *
- *    @details      This macro get RS-485address byte detection flag.
+ *    @details      This macro get RS-485 address byte detection flag.
  */
 #define UART_RS485_GET_ADDR_FLAG(uart)    (((uart)->FSR  & UART_FSR_RS485_ADD_DETF_Msk) >> UART_FSR_RS485_ADD_DETF_Pos)
 
 
-void UART_ClearIntFlag(UART_T* uart , uint32_t u32InterruptFlag);
+void UART_ClearIntFlag(UART_T* uart, uint32_t u32InterruptFlag);
 void UART_Close(UART_T* uart);
 void UART_DisableFlowCtrl(UART_T* uart);
 void UART_DisableInt(UART_T*  uart, uint32_t u32InterruptFlag);

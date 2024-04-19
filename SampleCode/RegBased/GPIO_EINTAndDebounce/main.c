@@ -67,8 +67,8 @@ void SYS_Init(void)
     CLK->CLKDIV = (CLK->CLKDIV & (~CLK_CLKDIV_HCLK_N_Msk)) | CLK_CLKDIV_HCLK(1);
 
     /* Set PLL to power down mode and PLL_STB bit in CLKSTATUS register will be cleared by hardware */
-    CLK->PLLCON |= CLK_PLLCON_PD_Msk;        
-    
+    CLK->PLLCON |= CLK_PLLCON_PD_Msk;
+
     /* Enable external XTAL 12MHz clock */
     CLK->PWRCON |= CLK_PWRCON_XTL12M_EN_Msk;
 
@@ -84,7 +84,7 @@ void SYS_Init(void)
     CLK->CLKSEL0 = (CLK->CLKSEL0 & (~CLK_CLKSEL0_HCLK_S_Msk)) | CLK_CLKSEL0_HCLK_S_PLL;
 
     /* Update System Core Clock */
-    /* User can use SystemCoreClockUpdate() to calculate PllClock, SystemCoreClock and CycylesPerUs automatically. */
+    /* User can use SystemCoreClockUpdate() to calculate PllClock, SystemCoreClock and CyclesPerUs automatically. */
     //SystemCoreClockUpdate();
     PllClock        = PLL_CLOCK;            // PLL
     SystemCoreClock = PLL_CLOCK / 1;        // HCLK
@@ -113,7 +113,7 @@ void SYS_Init(void)
     SYS->ALT_MFP2 |= SYS_ALT_MFP2_PB14_INT0 | SYS_ALT_MFP2_PB15_INT1;
 }
 
-void UART0_Init()
+void UART0_Init(void)
 {
     /*---------------------------------------------------------------------------------------------------------*/
     /* Init UART                                                                                               */
@@ -130,7 +130,7 @@ void UART0_Init()
 /*---------------------------------------------------------------------------------------------------------*/
 /* MAIN function                                                                                           */
 /*---------------------------------------------------------------------------------------------------------*/
-int main(void)
+int32_t main(void)
 {
     /* Unlock protected registers */
     SYS_UnlockReg();
@@ -166,7 +166,7 @@ int main(void)
     PB->IEN |= ((uint32_t)BIT15 << GPIO_IEN_IR_EN_Pos) | ((uint32_t)BIT15 << GPIO_IEN_IF_EN_Pos);
     NVIC_EnableIRQ(EINT1_IRQn);
 
-    /* Enable interrupt de-bounce function and select de-bounce sampling cycle time is 1024 locks of LIRC clock */
+    /* Enable interrupt de-bounce function and select de-bounce sampling cycle time is 1024 clocks of LIRC clock */
     GPIO->DBNCECON = (GPIO_DBNCECON_ICLK_ON_Msk | GPIO_DBCLKSRC_LIRC | GPIO_DBCLKSEL_1024);
     PB->DBEN |= (BIT14 | BIT15);
 

@@ -42,9 +42,9 @@ void I2C0_IRQHandler(void)
     {
         /* Clear I2C Wake-up interrupt flag */
         I2C_CLEAR_WAKEUP_FLAG(I2C0);
-			
-        g_u8SlvI2CWK = 1;		
-			
+
+        g_u8SlvI2CWK = 1;
+
         return;
     }
 
@@ -62,7 +62,7 @@ void I2C0_IRQHandler(void)
     }
 }
 /*---------------------------------------------------------------------------------------------------------*/
-/*  Power Wake-up IRQ Handler                                                                                       */
+/*  Power Wake-up IRQ Handler                                                                              */
 /*---------------------------------------------------------------------------------------------------------*/
 void PWRWU_IRQHandler(void)
 {
@@ -77,7 +77,7 @@ void PWRWU_IRQHandler(void)
 }
 
 /*---------------------------------------------------------------------------------------------------------*/
-/*  I2C Slave Transmit/Receive Callback Function                                                                               */
+/*  I2C Slave Transmit/Receive Callback Function                                                           */
 /*---------------------------------------------------------------------------------------------------------*/
 void I2C_SlaveTRx(uint32_t u32Status)
 {
@@ -232,7 +232,7 @@ void I2C0_Close(void)
 /*---------------------------------------------------------------------------------------------------------*/
 int32_t main(void)
 {
-    uint32_t i;
+    uint32_t i, u32TimeOutCnt;
 
     /* Unlock protected registers */
     SYS_UnlockReg();
@@ -244,7 +244,7 @@ int32_t main(void)
     UART0_Init();
 
     /* Lock protected registers */
-    SYS_LockReg();;
+    SYS_LockReg();
 
     /*
         This sample code is I2C SLAVE mode and it simulates EEPROM function
@@ -270,7 +270,7 @@ int32_t main(void)
 
     /* I2C function to Transmit/Receive data as slave */
     s_I2C0HandlerFn = I2C_SlaveTRx;
-		
+
     /* Set I2C0 enter Not Address SLAVE mode */
     I2C_SET_CONTROL_REG(I2C0, I2C_I2CON_SI_AA);
 
@@ -297,8 +297,10 @@ int32_t main(void)
     printf("Enter PD 0x%x 0x%x\n", I2C0->I2CON , I2C0->I2CSTATUS);
     printf("\n");
     printf("CHIP enter power down status.\n");
-    /* Waiting for UART printf finish*/
-    while(((UART0->FSR) & UART_FSR_TE_FLAG_Msk) == 0);
+    /* Waiting for UART printf finish */
+    u32TimeOutCnt = SystemCoreClock; /* 1 second time-out */
+    while(((UART0->FSR) & UART_FSR_TE_FLAG_Msk) == 0)
+        if(--u32TimeOutCnt == 0) break;
 
     if(((I2C0->I2CON)&I2C_I2CON_SI_Msk) != 0)
     {
@@ -312,10 +314,20 @@ int32_t main(void)
     __NOP();
     __NOP();
 
-    while((g_u8SlvPWRDNWK & g_u8SlvI2CWK) == 0);    
+    u32TimeOutCnt = I2C_TIMEOUT;
+    while((g_u8SlvPWRDNWK & g_u8SlvI2CWK) == 0)
+    {
+        if(--u32TimeOutCnt == 0)
+        {
+            printf("Wait for system or I2C interrupt time-out!\n");
+            break;
+        }
+    }
+
+    /* Wake-up Interrupt Message */
     printf("Power-down Wake-up INT 0x%x\n", (unsigned int)((CLK->PWRCON) & CLK_PWRCON_PD_WU_STS_Msk));		
     printf("I2C0 WAKE INT 0x%x\n", I2C0->I2CWKUPSTS);
-		
+
     /* Disable power wake-up interrupt */
     CLK->PWRCON &= ~CLK_PWRCON_PD_WU_INT_EN_Msk;
     NVIC_DisableIRQ(PWRWU_IRQn);

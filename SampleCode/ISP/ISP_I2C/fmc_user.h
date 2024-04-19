@@ -32,7 +32,7 @@ extern int FMC_Proc(unsigned int u32Cmd, unsigned int addr_start, unsigned int a
  * @note
  *              Please make sure that Register Write-Protection Function has been disabled
  *              before using this function. User can check the status of
- *              Register Write-Protection Function with DrvSYS_IsProtectedRegLocked().
+ *              Register Write-Protection Function with SYS_IsRegLocked().
  */
 #define FMC_Read_User(u32Addr, data) (FMC_Proc(FMC_ISPCMD_READ, u32Addr, (u32Addr) + 4, data))
 
@@ -47,7 +47,7 @@ extern int FMC_Proc(unsigned int u32Cmd, unsigned int addr_start, unsigned int a
  * @note
  *             Please make sure that Register Write-Protection Function has been disabled
  *             before using this function. User can check the status of
- *             Register Write-Protection Function with DrvSYS_IsProtectedRegLocked().
+ *             Register Write-Protection Function with SYS_IsRegLocked().
  */
 #define FMC_Erase_User(u32Addr) (FMC_Proc(FMC_ISPCMD_PAGE_ERASE, u32Addr, (u32Addr) + 4, 0))
 

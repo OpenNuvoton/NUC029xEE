@@ -86,7 +86,7 @@ void SYS_Init(void)
     CLK->CLKSEL1 = CLK_CLKSEL1_UART_S_PLL;
 
     /* Update System Core Clock */
-    /* User can use SystemCoreClockUpdate() to calculate PllClock, SystemCoreClock and CycylesPerUs automatically. */
+    /* User can use SystemCoreClockUpdate() to calculate PllClock, SystemCoreClock and CyclesPerUs automatically. */
     SystemCoreClockUpdate();
 
     /*---------------------------------------------------------------------------------------------------------*/
@@ -116,7 +116,7 @@ void UART0_Init(void)
 /*---------------------------------------------------------------------------------------------------------*/
 int main(void)
 {
-    uint32_t u32Sec, u32CurSec;;
+    uint32_t u32Sec, u32CurSec, u32TimeOutCnt;
 
     /* Unlock protected registers */
     SYS_UnlockReg();
@@ -138,7 +138,14 @@ int main(void)
     /* Initial RTC and stay in normal state */
     if(RTC->INIR != 0x1) {
         RTC->INIR = RTC_INIT_KEY;
-        while(RTC->INIR != 0x1);
+        u32TimeOutCnt = SystemCoreClock; /* 1 second time-out */
+        while(RTC->INIR != 0x1) {
+            if(--u32TimeOutCnt == 0) {
+                printf("\n RTC initial fail!!");
+                printf("\n Please check h/w setting!!");
+                goto lexit;
+            }
+        }
     }
 
     /* Setting RTC current date/time */
@@ -175,12 +182,16 @@ int main(void)
             u32CurSec = (((RTC->TLR & RTC_TLR_10SEC_Msk) >> RTC_TLR_10SEC_Pos) * 10) + (RTC->TLR & RTC_TLR_1SEC_Msk);
             if(u32Sec == u32CurSec) {
                 printf("\nRTC tick period time is incorrect.\n");
-                while(1);
+                goto lexit;
             }
 
             u32Sec = u32CurSec;
         }
     }
+
+lexit:
+
+    while(1);
 }
 
 /*** (C) COPYRIGHT 2018 Nuvoton Technology Corp. ***/

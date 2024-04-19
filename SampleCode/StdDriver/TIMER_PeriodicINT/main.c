@@ -119,18 +119,18 @@ void SYS_Init(void)
 
     /* Set core clock as PLL_CLOCK from PLL */
     CLK_SetCoreClock(PLL_CLOCK);
-    
+
     /* Enable UART module clock */
-    CLK_EnableModuleClock(UART0_MODULE);    
-    
+    CLK_EnableModuleClock(UART0_MODULE);
+
     /* Select UART module clock source */
     CLK_SetModuleClock(UART0_MODULE, CLK_CLKSEL1_UART_S_HXT, CLK_CLKDIV_UART(1));
 
     /* Enable Timer 0~3 module clock */
-    CLK_EnableModuleClock(TMR0_MODULE);    
-    CLK_EnableModuleClock(TMR1_MODULE);    
-    CLK_EnableModuleClock(TMR2_MODULE);    
-    CLK_EnableModuleClock(TMR3_MODULE);    
+    CLK_EnableModuleClock(TMR0_MODULE);
+    CLK_EnableModuleClock(TMR1_MODULE);
+    CLK_EnableModuleClock(TMR2_MODULE);
+    CLK_EnableModuleClock(TMR3_MODULE);
 
     /* Select Timer 0~3 module clock source */
     CLK_SetModuleClock(TMR0_MODULE, CLK_CLKSEL1_TMR0_S_HXT, NULL);
@@ -233,12 +233,14 @@ int main(void)
                     (g_au32TMRINTCount[2] > (g_au32TMRINTCount[0] * 4 + 1)) || (g_au32TMRINTCount[2] < (g_au32TMRINTCount[0] * 4 - 1)) ||
                     (g_au32TMRINTCount[3] > (g_au32TMRINTCount[0] * 8 + 1)) || (g_au32TMRINTCount[3] < (g_au32TMRINTCount[0] * 8 - 1))) {
                 printf("*** FAIL ***\n");
-                while(1);
+                goto lexit;
             }
         }
     }
 
     printf("*** PASS ***\n");
+
+lexit:
 
     while(1);
 }

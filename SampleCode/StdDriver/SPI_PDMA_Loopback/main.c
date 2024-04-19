@@ -156,7 +156,7 @@ void SPI_Init(void)
 void SpiLoopTest_WithPDMA(void)
 {
     PDMA_T *pdma;
-    uint32_t u32DataCount;
+    uint32_t u32DataCount, u32TimeOutCnt;
     int32_t i32Err;
 
 
@@ -228,22 +228,58 @@ void SpiLoopTest_WithPDMA(void)
     SPI_TRIGGER_TX_RX_PDMA(SPI0);
     
     /* Check Master RX DMA transfer done interrupt flag */
-    while((PDMA_GET_CH_INT_STS(SPI_MASTER_RX_DMA_CH) & PDMA_ISR_BLKD_IF_Msk)==0);
+    u32TimeOutCnt = SystemCoreClock; /* 1 second time-out */
+    while((PDMA_GET_CH_INT_STS(SPI_MASTER_RX_DMA_CH) & PDMA_ISR_BLKD_IF_Msk)==0)
+    {
+        if(--u32TimeOutCnt == 0)
+        {
+            printf("Wait for Master RX DMA transfer done interrupt flag time-out!\n");
+            i32Err = 1;
+            goto lexit;
+        }
+    }
     /* Clear the transfer done interrupt flag */
     PDMA_CLR_CH_INT_FLAG(SPI_MASTER_RX_DMA_CH, PDMA_ISR_BLKD_IF_Msk);
     
     /* Check Master TX DMA transfer done interrupt flag */
-    while((PDMA_GET_CH_INT_STS(SPI_MASTER_TX_DMA_CH) & PDMA_ISR_BLKD_IF_Msk)==0);
+    u32TimeOutCnt = SystemCoreClock; /* 1 second time-out */
+    while((PDMA_GET_CH_INT_STS(SPI_MASTER_TX_DMA_CH) & PDMA_ISR_BLKD_IF_Msk)==0)
+    {
+        if(--u32TimeOutCnt == 0)
+        {
+            printf("Wait for Master TX DMA transfer done interrupt flag time-out!\n");
+            i32Err = 1;
+            goto lexit;
+        }
+    }
     /* Clear the transfer done interrupt flag */
     PDMA_CLR_CH_INT_FLAG(SPI_MASTER_TX_DMA_CH, PDMA_ISR_BLKD_IF_Msk);
     
     /* Check Slave TX DMA transfer done interrupt flag */
-    while((PDMA_GET_CH_INT_STS(SPI_SLAVE_TX_DMA_CH) & PDMA_ISR_BLKD_IF_Msk)==0);
+    u32TimeOutCnt = SystemCoreClock; /* 1 second time-out */
+    while((PDMA_GET_CH_INT_STS(SPI_SLAVE_TX_DMA_CH) & PDMA_ISR_BLKD_IF_Msk)==0)
+    {
+        if(--u32TimeOutCnt == 0)
+        {
+            printf("Wait for Slave TX DMA transfer done interrupt flag time-out!\n");
+            i32Err = 1;
+            goto lexit;
+        }
+    }
     /* Clear the transfer done interrupt flag */
     PDMA_CLR_CH_INT_FLAG(SPI_SLAVE_TX_DMA_CH, PDMA_ISR_BLKD_IF_Msk);
     
     /* Check Slave RX DMA transfer done interrupt flag */
-    while((PDMA_GET_CH_INT_STS(SPI_SLAVE_RX_DMA_CH) & PDMA_ISR_BLKD_IF_Msk)==0);
+    u32TimeOutCnt = SystemCoreClock; /* 1 second time-out */
+    while((PDMA_GET_CH_INT_STS(SPI_SLAVE_RX_DMA_CH) & PDMA_ISR_BLKD_IF_Msk)==0)
+    {
+        if(--u32TimeOutCnt == 0)
+        {
+            printf("Wait for Slave RX DMA transfer done interrupt flag time-out!\n");
+            i32Err = 1;
+            goto lexit;
+        }
+    }
     /* Clear the transfer done interrupt flag */
     PDMA_CLR_CH_INT_FLAG(SPI_SLAVE_RX_DMA_CH, PDMA_ISR_BLKD_IF_Msk);
     
@@ -260,7 +296,9 @@ void SpiLoopTest_WithPDMA(void)
             break;
         }
     }
-    
+
+lexit:
+
     /* Disable PDMA peripheral clock */
     CLK->AHBCLK &= ~CLK_AHBCLK_PDMA_EN_Msk;
 

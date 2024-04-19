@@ -1,5 +1,5 @@
 /******************************************************************************
- * @file     LDROM_main.c
+ * @file     ldrom_main.c
  * @version  V1.00
  * $Revision: 2 $
  * $Date: 15/04/15 11:31a $
@@ -14,7 +14,7 @@
 
 #define PLLCON_SETTING      CLK_PLLCON_72MHz_HXT
 #define PLL_CLOCK           72000000
-void ProcessHardFault(void){}
+void ProcessHardFault(void){ while(1); /* Halt here if hard fault occurs. */ }
 
 void SYS_Init(void)
 {
@@ -109,6 +109,8 @@ static void PutString(char *str)
 
 int main()
 {
+    uint32_t u32TimeOutCnt;
+
     /* Unlock protected register */
     SYS_UnlockReg();
 
@@ -124,8 +126,10 @@ int main()
     PutString("\n\nPress any key to branch to APROM...\n");
     GetChar();
 
-    PutString("\n\nChange VECMAP and branch to LDROM...\n");
-    UART_WAIT_TX_EMPTY(UART0);
+    PutString("\n\nChange VECMAP and branch to APROM...\n");
+    u32TimeOutCnt = SystemCoreClock; /* 1 second time-out */
+    UART_WAIT_TX_EMPTY(UART0)
+        if(--u32TimeOutCnt == 0) break;
 
     /* Mask all interrupt before changing VECMAP to avoid wrong interrupt handler fetched */
     __set_PRIMASK(1);

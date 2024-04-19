@@ -67,6 +67,8 @@ extern "C"
 #define RTC_SNOOPER_RISING_EDGE     0xAUL       /*!< Snooper pin detected is rising-edge trigger */
 #define RTC_SNOOPER_DETECT_Msk      0xAUL       /*!< Snooper pin detected mask bits */
 
+#define RTC_TIMEOUT         (SystemCoreClock)   /*!< RTC time-out counter (1 second time-out) */
+
 /*@}*/ /* end of group RTC_EXPORTED_CONSTANTS */
 
 
@@ -215,15 +217,21 @@ typedef struct
   */
 static __INLINE void RTC_WaitAccessEnable(void)
 {
+    uint32_t u32TimeOutCnt;
+
     /* To wait AER bit is cleared and enable AER bit (Access bit) again */
-    while((RTC->AER & RTC_AER_ENF_Msk) == RTC_AER_ENF_Msk);
+    u32TimeOutCnt = RTC_TIMEOUT;
+    while((RTC->AER & RTC_AER_ENF_Msk) == RTC_AER_ENF_Msk)
+        if(--u32TimeOutCnt == 0) break;
     RTC->AER = RTC_WRITE_KEY;
 
     /* To wait AER bit is set and user can access the RTC registers from now on */
-    while((RTC->AER & RTC_AER_ENF_Msk) == 0x0);
+    u32TimeOutCnt = RTC_TIMEOUT;
+    while((RTC->AER & RTC_AER_ENF_Msk) == 0x0)
+        if(--u32TimeOutCnt == 0) break;
 }
 
-void RTC_Open(S_RTC_TIME_DATA_T *sPt);
+int32_t RTC_Open(S_RTC_TIME_DATA_T *sPt);
 void RTC_Close(void);
 void RTC_32KCalibration(int32_t i32FrequencyX100);
 void RTC_GetDateAndTime(S_RTC_TIME_DATA_T *sPt);
@@ -238,7 +246,7 @@ uint32_t RTC_GetDayOfWeek(void);
 void RTC_SetTickPeriod(uint32_t u32TickSelection);
 void RTC_EnableInt(uint32_t u32IntFlagMask);
 void RTC_DisableInt(uint32_t u32IntFlagMask);
-void RTC_EnableSpareRegister(void);
+int32_t RTC_EnableSpareRegister(void);
 void RTC_DisableSpareRegister(void);
 void RTC_EnableSnooperDetection(uint32_t u32PinCondition);
 void RTC_DisableSnooperDetection(void);

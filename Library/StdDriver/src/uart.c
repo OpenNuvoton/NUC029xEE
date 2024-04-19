@@ -28,22 +28,21 @@
  *
  *    @param[in]    uart                The pointer of the specified UART module.
  *    @param[in]    u32InterruptFlag    The specified interrupt of UART module.
- *                                      - UART_ISR_LIN_INT_Msk     : LIN bus interrupt
- *                                      - UART_ISR_BUF_ERR_INT_Msk : Buffer Error interrupt
- *                                      - UART_ISR_MODEM_INT_Msk   : Modem interrupt
- *                                      - UART_ISR_RLS_INT_Msk     : Rx Line status interrupt
+ *                                      - \ref UART_ISR_LIN_INT_Msk     : LIN bus interrupt
+ *                                      - \ref UART_ISR_BUF_ERR_INT_Msk : Buffer Error interrupt
+ *                                      - \ref UART_ISR_MODEM_INT_Msk   : Modem interrupt
+ *                                      - \ref UART_ISR_RLS_INT_Msk     : Rx Line status interrupt
  *
  *    @return       None
  *
  *    @details      The function is used to clear UART specified interrupt flag.
  */
-void UART_ClearIntFlag(UART_T* uart , uint32_t u32InterruptFlag)
+void UART_ClearIntFlag(UART_T* uart, uint32_t u32InterruptFlag)
 {
 
     if(u32InterruptFlag & UART_ISR_RLS_INT_Msk)   /* clear Receive Line Status Interrupt */
     {
-        uart->FSR = UART_FSR_BIF_Msk | UART_FSR_FEF_Msk | UART_FSR_PEF_Msk;
-        uart->FSR = UART_FSR_RS485_ADD_DETF_Msk;
+        uart->FSR = (UART_FSR_BIF_Msk | UART_FSR_FEF_Msk | UART_FSR_PEF_Msk | UART_FSR_RS485_ADD_DETF_Msk);
     }
 
     if(u32InterruptFlag & UART_ISR_MODEM_INT_Msk)  /* clear Modem Interrupt */
@@ -99,14 +98,14 @@ void UART_DisableFlowCtrl(UART_T* uart)
  *
  *    @param[in]    uart                The pointer of the specified UART module.
  *    @param[in]    u32InterruptFlag    The specified interrupt of UART module.
- *                                  - UART_IER_LIN_IEN_Msk        : LIN bus interrupt
- *                                  - UART_IER_WAKE_EN_Msk        : Wakeup interrupt
- *                                  - UART_IER_BUF_ERR_IEN_Msk    : Buffer Error interrupt
- *                                  - UART_IER_RTO_IEN_Msk        : Rx time-out interrupt
- *                                  - UART_IER_MODEM_IEN_Msk      : Modem interrupt
- *                                  - UART_IER_RLS_IEN_Msk        : Rx Line status interrupt
- *                                  - UART_IER_THRE_IEN_Msk       : Tx empty interrupt
- *                                  - UART_IER_RDA_IEN_Msk        : Rx ready interrupt
+ *                                      - \ref UART_IER_LIN_IEN_Msk        : LIN bus interrupt
+ *                                      - \ref UART_IER_WAKE_EN_Msk        : Wakeup interrupt
+ *                                      - \ref UART_IER_BUF_ERR_IEN_Msk    : Buffer Error interrupt
+ *                                      - \ref UART_IER_RTO_IEN_Msk        : Rx time-out interrupt
+ *                                      - \ref UART_IER_MODEM_IEN_Msk      : Modem interrupt
+ *                                      - \ref UART_IER_RLS_IEN_Msk        : Rx Line status interrupt
+ *                                      - \ref UART_IER_THRE_IEN_Msk       : Tx empty interrupt
+ *                                      - \ref UART_IER_RDA_IEN_Msk        : Rx ready interrupt
  *
  *    @return       None
  *
@@ -154,14 +153,14 @@ void UART_EnableFlowCtrl(UART_T* uart)
  *
  *    @param[in]    uart                The pointer of the specified UART module.
  *    @param[in]    u32InterruptFlag    The specified interrupt of UART module:
- *                                      - UART_IER_LIN_IEN_Msk        : LIN bus interrupt
- *                                      - UART_IER_WAKE_EN_Msk        : Wakeup interrupt
- *                                      - UART_IER_BUF_ERR_IEN_Msk    : Buffer Error interrupt
- *                                      - UART_IER_RTO_IEN_Msk        : Rx time-out interrupt
- *                                      - UART_IER_MODEM_IEN_Msk      : Modem interrupt
- *                                      - UART_IER_RLS_IEN_Msk        : Rx Line status interrupt
- *                                      - UART_IER_THRE_IEN_Msk       : Tx empty interrupt
- *                                      - UART_IER_RDA_IEN_Msk        : Rx ready interrupt
+ *                                      - \ref UART_IER_LIN_IEN_Msk        : LIN bus interrupt
+ *                                      - \ref UART_IER_WAKE_EN_Msk        : Wakeup interrupt
+ *                                      - \ref UART_IER_BUF_ERR_IEN_Msk    : Buffer Error interrupt
+ *                                      - \ref UART_IER_RTO_IEN_Msk        : Rx time-out interrupt
+ *                                      - \ref UART_IER_MODEM_IEN_Msk      : Modem interrupt
+ *                                      - \ref UART_IER_RLS_IEN_Msk        : Rx Line status interrupt
+ *                                      - \ref UART_IER_THRE_IEN_Msk       : Tx empty interrupt
+ *                                      - \ref UART_IER_RDA_IEN_Msk        : Rx ready interrupt
  *
  *    @return       None
  *
@@ -197,7 +196,7 @@ void UART_EnableInt(UART_T*  uart, uint32_t u32InterruptFlag)
 void UART_Open(UART_T* uart, uint32_t u32baudrate)
 {
     uint8_t u8UartClkSrcSel, u8UartClkDivNum;
-    uint32_t u32ClkTbl[4] = {__HXT, 0, 0, __HIRC};
+    uint32_t au32ClkTbl[4] = {__HXT, 0, 0, __HIRC};
     uint32_t u32Baud_Div = 0;
 
     /* Get UART clock source selection */
@@ -217,15 +216,15 @@ void UART_Open(UART_T* uart, uint32_t u32baudrate)
 
     /* Get PLL clock frequency if UART clock source selection is PLL */
     if(u8UartClkSrcSel == 1)
-        u32ClkTbl[u8UartClkSrcSel] = CLK_GetPLLClockFreq();
+        au32ClkTbl[u8UartClkSrcSel] = CLK_GetPLLClockFreq();
 
     /* Set UART baud rate */
     if(u32baudrate != 0)
     {
-        u32Baud_Div = UART_BAUD_MODE2_DIVIDER((u32ClkTbl[u8UartClkSrcSel]) / (u8UartClkDivNum + 1), u32baudrate);
+        u32Baud_Div = UART_BAUD_MODE2_DIVIDER((au32ClkTbl[u8UartClkSrcSel]) / (u8UartClkDivNum + 1), u32baudrate);
 
         if(u32Baud_Div > 0xFFFF)
-            uart->BAUD = (UART_BAUD_MODE0 | UART_BAUD_MODE0_DIVIDER((u32ClkTbl[u8UartClkSrcSel]) / (u8UartClkDivNum + 1), u32baudrate));
+            uart->BAUD = (UART_BAUD_MODE0 | UART_BAUD_MODE0_DIVIDER((au32ClkTbl[u8UartClkSrcSel]) / (u8UartClkDivNum + 1), u32baudrate));
         else
             uart->BAUD = (UART_BAUD_MODE2 | u32Baud_Div);
     }
@@ -272,30 +271,29 @@ uint32_t UART_Read(UART_T* uart, uint8_t *pu8RxBuf, uint32_t u32ReadBytes)
  *    @param[in]    u32baudrate     The baudrate of UART module.
  *                                  If u32baudrate = 0, UART baudrate will not change.
  *    @param[in]    u32data_width   The data length of UART module.
- *                                  - UART_WORD_LEN_5
- *                                  - UART_WORD_LEN_6
- *                                  - UART_WORD_LEN_7
- *                                  - UART_WORD_LEN_8
+ *                                  - \ref UART_WORD_LEN_5
+ *                                  - \ref UART_WORD_LEN_6
+ *                                  - \ref UART_WORD_LEN_7
+ *                                  - \ref UART_WORD_LEN_8
  *    @param[in]    u32parity       The parity setting (none/odd/even/mark/space) of UART module.
- *                                  - UART_PARITY_NONE
- *                                  - UART_PARITY_ODD
- *                                  - UART_PARITY_EVEN
- *                                  - UART_PARITY_MARK
- *                                  - UART_PARITY_SPACE
+ *                                  - \ref UART_PARITY_NONE
+ *                                  - \ref UART_PARITY_ODD
+ *                                  - \ref UART_PARITY_EVEN
+ *                                  - \ref UART_PARITY_MARK
+ *                                  - \ref UART_PARITY_SPACE
  *    @param[in]    u32stop_bits    The stop bit length (1/1.5/2 bit) of UART module.
- *                                  - UART_STOP_BIT_1
- *                                  - UART_STOP_BIT_1_5
- *                                  - UART_STOP_BIT_2
+ *                                  - \ref UART_STOP_BIT_1
+ *                                  - \ref UART_STOP_BIT_1_5
+ *                                  - \ref UART_STOP_BIT_2
  *
  *    @return       None
  *
  *    @details      This function use to config UART line setting.
-
  */
 void UART_SetLine_Config(UART_T* uart, uint32_t u32baudrate, uint32_t u32data_width, uint32_t u32parity, uint32_t  u32stop_bits)
 {
     uint8_t u8UartClkSrcSel, u8UartClkDivNum;
-    uint32_t u32ClkTbl[4] = {__HXT, 0, 0, __HIRC};
+    uint32_t au32ClkTbl[4] = {__HXT, 0, 0, __HIRC};
     uint32_t u32Baud_Div = 0;
 
     /* Get UART clock source selection */
@@ -306,15 +304,15 @@ void UART_SetLine_Config(UART_T* uart, uint32_t u32baudrate, uint32_t u32data_wi
 
     /* Get PLL clock frequency if UART clock source selection is PLL */
     if(u8UartClkSrcSel == 1)
-        u32ClkTbl[u8UartClkSrcSel] = CLK_GetPLLClockFreq();
+        au32ClkTbl[u8UartClkSrcSel] = CLK_GetPLLClockFreq();
 
     /* Set UART baud rate */
     if(u32baudrate != 0)
     {
-        u32Baud_Div = UART_BAUD_MODE2_DIVIDER((u32ClkTbl[u8UartClkSrcSel]) / (u8UartClkDivNum + 1), u32baudrate);
+        u32Baud_Div = UART_BAUD_MODE2_DIVIDER((au32ClkTbl[u8UartClkSrcSel]) / (u8UartClkDivNum + 1), u32baudrate);
 
         if(u32Baud_Div > 0xFFFF)
-            uart->BAUD = (UART_BAUD_MODE0 | UART_BAUD_MODE0_DIVIDER((u32ClkTbl[u8UartClkSrcSel]) / (u8UartClkDivNum + 1), u32baudrate));
+            uart->BAUD = (UART_BAUD_MODE0 | UART_BAUD_MODE0_DIVIDER((au32ClkTbl[u8UartClkSrcSel]) / (u8UartClkDivNum + 1), u32baudrate));
         else
             uart->BAUD = (UART_BAUD_MODE2 | u32Baud_Div);
     }
@@ -350,17 +348,17 @@ void UART_SetTimeoutCnt(UART_T* uart, uint32_t u32TOC)
  *    @param[in]    uart            The pointer of the specified UART module.
  *    @param[in]    u32Buadrate     The baudrate of UART module.
  *    @param[in]    u32Direction    The direction(transmit:1/receive:0) of UART module in IrDA mode:
- *                                  - UART_IRCR_TX_SELECT
- *                                  - UART_IRCR_RX_SELECT
+ *                                  - \ref UART_IRCR_TX_SELECT
+ *                                  - \ref UART_IRCR_RX_SELECT
  *
  *    @return       None
-  *
+ *
  *    @details      The function is used to configure IrDA relative settings. It consists of TX or RX mode and baudrate.
  */
 void UART_SelectIrDAMode(UART_T* uart, uint32_t u32Buadrate, uint32_t u32Direction)
 {
     uint8_t u8UartClkSrcSel, u8UartClkDivNum;
-    uint32_t u32ClkTbl[4] = {__HXT, 0, 0, __HIRC};
+    uint32_t au32ClkTbl[4] = {__HXT, 0, 0, __HIRC};
     uint32_t u32Baud_Div;
 
     /* Select IrDA function mode */
@@ -374,12 +372,12 @@ void UART_SelectIrDAMode(UART_T* uart, uint32_t u32Buadrate, uint32_t u32Directi
 
     /* Get PLL clock frequency if UART clock source selection is PLL */
     if(u8UartClkSrcSel == 1)
-        u32ClkTbl[u8UartClkSrcSel] = CLK_GetPLLClockFreq();
+        au32ClkTbl[u8UartClkSrcSel] = CLK_GetPLLClockFreq();
 
     /* Set UART IrDA baud rate in mode 0 */
     if(u32Buadrate != 0)
     {
-        u32Baud_Div = UART_BAUD_MODE0_DIVIDER((u32ClkTbl[u8UartClkSrcSel]) / (u8UartClkDivNum + 1), u32Buadrate);
+        u32Baud_Div = UART_BAUD_MODE0_DIVIDER((au32ClkTbl[u8UartClkSrcSel]) / (u8UartClkDivNum + 1), u32Buadrate);
 
         if(u32Baud_Div < 0xFFFF)
             uart->BAUD = (UART_BAUD_MODE0 | u32Baud_Div);
@@ -404,9 +402,9 @@ void UART_SelectIrDAMode(UART_T* uart, uint32_t u32Buadrate, uint32_t u32Directi
  *
  *    @param[in]    uart        The pointer of the specified UART module.
  *    @param[in]    u32Mode     The operation mode(NMM/AUD/AAD).
- *                              - UART_ALT_CSR_RS485_NMM_Msk
- *                              - UART_ALT_CSR_RS485_AUD_Msk
- *                              - UART_ALT_CSR_RS485_AAD_Msk
+ *                              - \ref UART_ALT_CSR_RS485_NMM_Msk
+ *                              - \ref UART_ALT_CSR_RS485_AUD_Msk
+ *                              - \ref UART_ALT_CSR_RS485_AAD_Msk
  *    @param[in]    u32Addr     The RS485 address.
  *
  *    @return       None

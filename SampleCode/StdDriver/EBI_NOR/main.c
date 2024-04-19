@@ -207,7 +207,7 @@ int main(void)
     else
     {
         printf("NOR W39L040P initial fail ! (ID:0x%X)\n\n", u32NORIDInfo);
-        while(1);
+        goto lexit;
     }
 
     /* Erase flash */
@@ -218,13 +218,18 @@ int main(void)
         if(u8ReadOutData != 0xFF)
         {
             printf("    >> Chip Erase Fail !! Addr:0x%X, Data:0x%X.\n\n", u32i, u8ReadOutData);
-            while(1);
+            goto lexit;
         }
     }
     printf("    >> Chip Erase OK !!!\n");
 
     /* Start to program NOR flash test */
-    ProgramContinueDataTest();
+    if( ProgramContinueDataTest() == TRUE )
+    {
+        printf("*** NOR Flash Test OK ***\n");
+    }
+
+lexit:
 
     /* Disable EBI function */
     EBI_Close(0);

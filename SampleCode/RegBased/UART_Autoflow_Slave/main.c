@@ -47,9 +47,9 @@ void SYS_Init(void)
     /* Switch HCLK clock source to Internal RC and HCLK source divide 1 */
     CLK->CLKSEL0 = (CLK->CLKSEL0 & (~CLK_CLKSEL0_HCLK_S_Msk)) | CLK_CLKSEL0_HCLK_S_HIRC;
     CLK->CLKDIV = (CLK->CLKDIV & (~CLK_CLKDIV_HCLK_N_Msk)) | CLK_CLKDIV_HCLK(1);
-    
+
     /* Set PLL to power down mode and PLL_STB bit in CLKSTATUS register will be cleared by hardware */
-    CLK->PLLCON |= CLK_PLLCON_PD_Msk;     
+    CLK->PLLCON |= CLK_PLLCON_PD_Msk;
 
     /* Enable external XTAL 12MHz clock */
     CLK->PWRCON |= CLK_PWRCON_XTL12M_EN_Msk;
@@ -66,7 +66,7 @@ void SYS_Init(void)
     CLK->CLKSEL0 = (CLK->CLKSEL0 & (~CLK_CLKSEL0_HCLK_S_Msk)) | CLK_CLKSEL0_HCLK_S_PLL;
 
     /* Update System Core Clock */
-    /* User can use SystemCoreClockUpdate() to calculate PllClock, SystemCoreClock and CycylesPerUs automatically. */
+    /* User can use SystemCoreClockUpdate() to calculate PllClock, SystemCoreClock and CyclesPerUs automatically. */
     //SystemCoreClockUpdate();
     PllClock        = PLL_CLOCK;            // PLL
     SystemCoreClock = PLL_CLOCK / 1;        // HCLK
@@ -181,7 +181,7 @@ void UART1_IRQHandler(void)
 /*---------------------------------------------------------------------------------------------------------*/
 void AutoFlow_FunctionRxTest()
 {
-    uint32_t u32i;
+    uint32_t u32i, u32Err = 0;
 
     printf("\n");
     printf("+-----------------------------------------------------------+\n");
@@ -202,7 +202,7 @@ void AutoFlow_FunctionRxTest()
     printf("|  Description :                                            |\n");
     printf("|    The sample code needs two boards. One is Master and    |\n");
     printf("|    the other is slave. Master will send 1k bytes data     |\n");
-    printf("|    to slave.Slave will check if received data is correct  |\n");
+    printf("|    to slave. Slave will check if received data is correct |\n");
     printf("|    after getting 1k bytes data.                           |\n");
     printf("|    Press any key to start...                              |\n");
     printf("+-----------------------------------------------------------+\n");
@@ -238,11 +238,15 @@ void AutoFlow_FunctionRxTest()
     /* Compare Data */
     for(u32i = 0; u32i < RXBUFSIZE; u32i++) {
         if(g_u8RecData[u32i] != (u32i & 0xFF)) {
-            printf("Compare Data Failed\n");
-            while(1);
+            u32Err = 1;
+            break;
         }
     }
-    printf("\n Receive OK & Check OK\n");
+
+    if( u32Err )
+        printf("Compare Data Failed\n");
+    else
+        printf("\n Receive OK & Check OK\n");
 
     /* Disable UART1 IRQ */
     NVIC_DisableIRQ(UART1_IRQn);

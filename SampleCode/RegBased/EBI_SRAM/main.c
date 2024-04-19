@@ -15,8 +15,8 @@
 #define PLLCON_SETTING      CLK_PLLCON_72MHz_HXT
 
 
-extern void SRAM_BS616LV4017(void);
-void AccessEBIWithPDMA(void);
+extern int32_t SRAM_BS616LV4017(void);
+int32_t AccessEBIWithPDMA(void);
 
 
 void SYS_Init(void)
@@ -38,7 +38,7 @@ void SYS_Init(void)
 
     /* Enable external 12 MHz XTAL */
     CLK->PWRCON |= CLK_PWRCON_XTL12M_EN_Msk;
-    
+
     /* Waiting for clock ready */
     while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_XTL12M_STB_Msk));
 
@@ -47,7 +47,7 @@ void SYS_Init(void)
 
     /* Waiting for clock ready */
     while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_PLL_STB_Msk));
-    
+
     /* System optimization when CPU runs at 72MHz */
     FMC->FATCON |= 0x50;
 
@@ -64,7 +64,7 @@ void SYS_Init(void)
     CLK->CLKSEL1 = CLK_CLKSEL1_UART_S_PLL;
 
     /* Update System Core Clock */
-    /* User can use SystemCoreClockUpdate() to calculate PllClock, SystemCoreClock and CycylesPerUs automatically. */
+    /* User can use SystemCoreClockUpdate() to calculate PllClock, SystemCoreClock and CyclesPerUs automatically. */
     SystemCoreClockUpdate();
 
     /*---------------------------------------------------------------------------------------------------------*/
@@ -92,8 +92,8 @@ void SYS_Init(void)
     SYS->ALT_MFP |= (SYS_ALT_MFP_PC6_AD4 | SYS_ALT_MFP_PC7_AD5);
     SYS->GPA_MFP |= (SYS_GPA_MFP_PA6_AD7);
     SYS->ALT_MFP |= (SYS_ALT_MFP_PA6_AD7);
-    SYS->ALT_MFP2 |= (SYS_ALT_MFP2_PB14_AD0 | SYS_ALT_MFP2_PB15_AD6); 
-   
+    SYS->ALT_MFP2 |= (SYS_ALT_MFP2_PB14_AD0 | SYS_ALT_MFP2_PB15_AD6);
+
     /* Set multi-function pins for EBI AD8 ~ AD15 */
     SYS->GPA_MFP &= ~(SYS_GPA_MFP_PA5_Msk | SYS_GPA_MFP_PA4_Msk |
                       SYS_GPA_MFP_PA3_Msk | SYS_GPA_MFP_PA2_Msk |
@@ -111,7 +111,7 @@ void SYS_Init(void)
                      SYS_ALT_MFP_PA3_AD10 | SYS_ALT_MFP_PA2_AD11 |
                      SYS_ALT_MFP_PA1_AD12 | SYS_ALT_MFP_PA12_AD13 |
                      SYS_ALT_MFP_PA13_AD14 | SYS_ALT_MFP_PA14_AD15);
-                         
+
     /* Set multi-function pins for EBI nCS, ALE and MCLK */
     SYS->GPB_MFP &= ~(SYS_GPB_MFP_PB7_Msk | SYS_GPB_MFP_PB6_Msk);
     SYS->ALT_MFP &= ~(SYS_ALT_MFP_PB7_Msk | SYS_ALT_MFP_PB6_Msk);
@@ -179,18 +179,20 @@ int main(void)
     EBI->EXTIME = 0x03003318;
 
     /* Start SRAM test */
-    SRAM_BS616LV4017();
+    if( SRAM_BS616LV4017() < 0) goto lexit;
 
     /* EBI sram with PDMA test */
-    AccessEBIWithPDMA();
-    
+    if( AccessEBIWithPDMA() < 0) goto lexit;
+
+    printf("*** SRAM Test OK ***\n");
+
+lexit:
+
     /* Disable EBI function */
     EBI->EBICON &= ~EBI_EBICON_ExtEN_Msk;
 
     /* Disable EBI clock */
     CLK->AHBCLK &= ~CLK_AHBCLK_EBI_EN_Msk;
-
-    printf("*** SRAM Test OK ***\n");
 
     while(1);
 }
@@ -256,22 +258,23 @@ void PDMA_IRQHandler(void)
         printf("unknown interrupt !!\n");
 }
 
-void AccessEBIWithPDMA(void)
+int32_t AccessEBIWithPDMA(void)
 {
     uint32_t i;
     uint32_t u32Result0 = 0x5A5A, u32Result1 = 0x5A5A;
-    
+    uint32_t u32TimeOutCnt = 0;
+
     printf("[[ Access EBI with PDMA ]]\n");
-    
+
     /* Enable PDMA clock source */
-    CLK->AHBCLK |= CLK_AHBCLK_PDMA_EN_Msk;    
+    CLK->AHBCLK |= CLK_AHBCLK_PDMA_EN_Msk;
 
     for(i=0; i<64; i++) {
         SrcArray[i] = 0x76570000 + i;
         u32Result0 += SrcArray[i];
     }
 
-    /* Open Channel 2 */    
+    /* Open Channel 2 */
     PDMA_GCR->GCRCSR |= (1 << 2 << 8);
     /* set transfer byte count(transfer width is 32) */
     PDMA2->BCR = (PDMA_TEST_LENGTH << 2);
@@ -286,9 +289,15 @@ void AccessEBIWithPDMA(void)
     u32IsTestOver = 0xFF;
     /* trigger transfer */
     PDMA2->CSR |= (PDMA_CSR_TRIG_EN_Msk | PDMA_CSR_PDMACEN_Msk);
-    while(u32IsTestOver == 0xFF);
+    u32TimeOutCnt = SystemCoreClock; /* 1 second time-out */
+    while(u32IsTestOver == 0xFF) {
+        if(--u32TimeOutCnt == 0) {
+            printf("Wait for PDMA time-out!\n");
+            return -1;
+        }
+    }
     /* Transfer internal SRAM to EBI SRAM done */
-       
+
     /* Clear internal SRAM data */
     for(i=0; i<64; i++) {
         SrcArray[i] = 0x0;
@@ -309,25 +318,33 @@ void AccessEBIWithPDMA(void)
     u32IsTestOver = 0xFF;
     /* trigger transfer */
     PDMA2->CSR |= (PDMA_CSR_TRIG_EN_Msk | PDMA_CSR_PDMACEN_Msk);
-    while(u32IsTestOver == 0xFF);
+    u32TimeOutCnt = SystemCoreClock; /* 1 second time-out */
+    while(u32IsTestOver == 0xFF) {
+        if(--u32TimeOutCnt == 0) {
+            printf("Wait for PDMA time-out!\n");
+            return -1;
+        }
+    }
     /* Transfer EBI SRAM to internal SRAM done */
     for(i=0; i<64; i++) {
         u32Result1 += SrcArray[i];
     }
-    
+
     if(u32IsTestOver == 2) {
         if((u32Result0 == u32Result1) && (u32Result0 != 0x5A5A)) {
             printf("        PASS (0x%X)\n\n", u32Result0);
         }else {
             printf("        FAIL - data matched (0x%X)\n\n", u32Result0);
-            while(1);
+            return -1;
         }
     }else {
-            printf("        PDMA fail\n\n");
-            while(1);
+        printf("        PDMA fail\n\n");
+        return -1;
     }
-        
+
     PDMA_GCR->GCRCSR = 0;
+
+    return 0;
 }
 
 /*** (C) COPYRIGHT 2018 Nuvoton Technology Corp. ***/

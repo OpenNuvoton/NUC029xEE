@@ -15,6 +15,8 @@
 #define PLLCON_SETTING      CLK_PLLCON_72MHz_HXT
 #define PLL_CLOCK           72000000
 
+int32_t g_FMC_i32ErrCode;
+
 void SYS_Init(void)
 {
     /*---------------------------------------------------------------------------------------------------------*/
@@ -27,7 +29,7 @@ void SYS_Init(void)
     /* Waiting for Internal RC clock ready */
     while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_OSC22M_STB_Msk));
 
-    /* Switch HCLK clock source to Internal RC and and HCLK source divide 1 */
+    /* Switch HCLK clock source to Internal RC and HCLK source divide 1 */
     CLK->CLKSEL0 &= ~CLK_CLKSEL0_HCLK_S_Msk;
     CLK->CLKSEL0 |= CLK_CLKSEL0_HCLK_S_HIRC;
     CLK->CLKDIV &= ~CLK_CLKDIV_HCLK_N_Msk;
@@ -46,11 +48,11 @@ void SYS_Init(void)
     CLK->CLKSEL0 |= CLK_CLKSEL0_HCLK_S_PLL;
 
     /* Update System Core Clock */
-    /* User can use SystemCoreClockUpdate() to calculate PllClock, SystemCoreClock and CycylesPerUs automatically. */
+    /* User can use SystemCoreClockUpdate() to calculate PllClock, SystemCoreClock and CyclesPerUs automatically. */
     //SystemCoreClockUpdate();
     PllClock        = PLL_CLOCK;            // PLL
     SystemCoreClock = PLL_CLOCK / 1;        // HCLK
-    CyclesPerUs     = PLL_CLOCK / 1000000;  // For SYS_SysTickDelay()
+    CyclesPerUs     = PLL_CLOCK / 1000000;  // For CLK_SysTickDelay()
 
     /* Enable UART module clock */
     CLK->APBCLK |= CLK_APBCLK_UART0_EN_Msk;

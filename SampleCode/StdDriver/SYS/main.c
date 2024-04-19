@@ -113,11 +113,11 @@ void SYS_PLL_Test(void)
     int32_t  i;
 
     /*---------------------------------------------------------------------------------------------------------*/
-    /* PLL clock configuration test                                                                             */
+    /* PLL clock configuration test                                                                            */
     /*---------------------------------------------------------------------------------------------------------*/
 
-    printf("\n-------------------------[ Test PLL ]-----------------------------\n"); 
-    
+    printf("\n-------------------------[ Test PLL ]-----------------------------\n");
+
     for(i = 0; i < sizeof(g_au32PllSetting) / sizeof(g_au32PllSetting[0]) ; i++) {
         /* Switch HCLK clock source to HXT and HCLK source divide 1 */
         CLK_SetHCLK(CLK_CLKSEL0_HCLK_S_HXT, CLK_CLKDIV_HCLK(1));
@@ -213,7 +213,7 @@ void UART0_Init()
 /*---------------------------------------------------------------------------------------------------------*/
 int32_t main(void)
 {
-    uint32_t u32data;
+    uint32_t u32data, u32TimeOutCnt;
 
     /* In end of main function, program issued CPU reset and write-protection will be disabled. */
     if(SYS_IsRegLocked() == 0)
@@ -267,7 +267,7 @@ int32_t main(void)
     /* Clear reset source */
     SYS_ClearResetSrc(u32data);
 
-    /* Unlock protected registers for Brown-Out Detector settings */
+    /* Unlock protected registers for Brown-out Detector settings */
     SYS_UnlockReg();
 
     /* Check if the write-protected registers are unlocked before BOD setting and CPU Reset */
@@ -275,7 +275,7 @@ int32_t main(void)
         printf("Protected Address is Unlocked\n");
     }
 
-    /* Enable Brown-Out Detector, and set Brown-Out Detector voltage 2.7V */
+    /* Enable Brown-out Detector, and set Brown-out Detector voltage 2.7V */
     SYS_EnableBOD(SYS_BODCR_BOD_INTERRUPT_EN, SYS_BODCR_BOD_VL_2_7V);
 
     /* Enable BOD IRQ */
@@ -292,7 +292,9 @@ int32_t main(void)
     printf("\n\n  >>> Reset CPU <<<\n");
 
     /* Waiting for message send out */
-    UART_WAIT_TX_EMPTY(UART0);
+    u32TimeOutCnt = SystemCoreClock; /* 1 second time-out */
+    UART_WAIT_TX_EMPTY(UART0)
+        if(--u32TimeOutCnt == 0) break;
 
     /* Switch HCLK clock source to Internal RC 22.1184MHz clock and HCLK source divide 1 */
     CLK_SetHCLK(CLK_CLKSEL0_HCLK_S_HIRC, CLK_CLKDIV_HCLK(1));
