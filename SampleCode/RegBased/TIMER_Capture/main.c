@@ -95,6 +95,8 @@ void TMR3_IRQHandler(void)
 
 void SYS_Init(void)
 {
+	uint32_t u32TimeOutCnt;
+
     /*---------------------------------------------------------------------------------------------------------*/
     /* Init System Clock                                                                                       */
     /*---------------------------------------------------------------------------------------------------------*/
@@ -102,7 +104,9 @@ void SYS_Init(void)
     CLK->PWRCON |= CLK_PWRCON_IRC22M_EN_Msk;
 
     /* Waiting for IRC22M clock ready */
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_IRC22M_STB_Msk));
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_IRC22M_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
 
     /* Switch HCLK clock source to HIRC */
     CLK->CLKSEL0 = CLK_CLKSEL0_HCLK_S_HIRC;
@@ -114,17 +118,22 @@ void SYS_Init(void)
     CLK->PWRCON |= CLK_PWRCON_XTL12M_EN_Msk;
 
     /* Waiting for clock ready */
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_XTL12M_STB_Msk));
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_XTL12M_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
 
     /* Enable PLL and Set PLL frequency */
     CLK->PLLCON = PLLCON_SETTING;
 
     /* Waiting for clock ready */
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_PLL_STB_Msk));
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_PLL_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
+
 
     /* System optimization when CPU runs at 72MHz */
     FMC->FATCON |= 0x50;
-    
+
     /* Switch HCLK clock source to PLL, STCLK to HCLK/2 */
     CLK->CLKSEL0 = CLK_CLKSEL0_STCLK_S_HCLK_DIV2 | CLK_CLKSEL0_HCLK_S_PLL;
 
@@ -148,9 +157,9 @@ void SYS_Init(void)
     SYS->GPB_MFP |= (SYS_GPB_MFP_PB0_UART0_RXD | SYS_GPB_MFP_PB1_UART0_TXD);
 
     /* Set PB multi-function pins for TM0, TM2, TM3 and TM2_EXT */
-    SYS->GPB_MFP &= ~(SYS_GPB_MFP_PB8_Msk | SYS_GPB_MFP_PB10_Msk | 
+    SYS->GPB_MFP &= ~(SYS_GPB_MFP_PB8_Msk | SYS_GPB_MFP_PB10_Msk |
                       SYS_GPB_MFP_PB11_Msk | SYS_GPB_MFP_PB2_Msk);
-    SYS->GPB_MFP |= (SYS_GPB_MFP_PB8_TM0 | SYS_GPB_MFP_PB10_TM2 | 
+    SYS->GPB_MFP |= (SYS_GPB_MFP_PB8_TM0 | SYS_GPB_MFP_PB10_TM2 |
                      SYS_GPB_MFP_PB11_TM3 | SYS_GPB_MFP_PB2_TM2_EXT);
 
     SYS->ALT_MFP  &= ~( SYS_ALT_MFP_PB8_Msk | SYS_ALT_MFP_PB10_Msk | SYS_ALT_MFP_PB11_Msk |
@@ -242,14 +251,14 @@ int main(void)
             }
             u32InitCount = g_au32TMRINTCount[2];
         }
-        
+
         if(au32CAPValus[0] == 0) {
             if(u32Loop++ > (SystemCoreClock/100)) {
                 printf("Time-out error. Please check timer couner and capture input source.\n");
                 goto lexit;
             }
         }
-        
+
         if(u32InitCount == 10)
             break;
     }
